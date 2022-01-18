@@ -5,7 +5,7 @@ from selenium import webdriver
 import requests
 from typing import List, Tuple, NamedTuple
 from datetime import datetime, timedelta
-from news_scanner.proxy.proxy_constants import proxy_options
+from news_scanner.proxy.proxy_constants import PROXY_OPTIONS
 from news_scanner.logger.logger import logger
 
 TIME_FORMAT = "%b %d, %Y %I:%M %p %Z"
@@ -68,7 +68,7 @@ class TargetNewsScrapper:
         return results
 
     def _init_web_driver(self):
-        self.browser = webdriver.Chrome(options=proxy_options)
+        self.browser = webdriver.Chrome(options=PROXY_OPTIONS)
 
     def _get_page_content(self, link: str) -> bs4.BeautifulSoup:
         """ Returns the html contents of a webpage.

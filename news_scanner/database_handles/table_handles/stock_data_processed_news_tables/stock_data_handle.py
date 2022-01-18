@@ -4,7 +4,7 @@ from pathlib import Path
 from news_scanner.database_handles.base_handle import BaseHandle
 from news_scanner.database_handles.table_handles.\
     stock_data_processed_news_tables.constants import AGG_ID
-from news_scanner.td_api.td_api import StockData
+from news_scanner.td_api.td_api_handle import StockData
 
 
 class StockDataHandle(BaseHandle):

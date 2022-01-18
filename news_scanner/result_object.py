@@ -2,7 +2,7 @@
 
 from news_scanner.news_scrapper.target_news_scrapper import ScrappedNewsResult
 from news_scanner.news_scrapper.article_processor import ProcessedNewsResult
-from news_scanner.td_api.td_api import StockData
+from news_scanner.td_api.td_api_handle import StockData
 from typing import NamedTuple
 
 

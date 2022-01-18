@@ -2,7 +2,7 @@
 
 from typing import List, Tuple, Dict, NamedTuple
 import re
-import news_scanner.news_scrapper.target_news_scrapper as tns
+from news_scanner.news_scrapper.target_news_scrapper import ScrappedNewsResult
 
 ALLOWED_EXCHANGES = ["NASDAQ", "NYSE"]   # OTC, pink sheets?
 
@@ -19,16 +19,19 @@ class ProcessedNewsResult(NamedTuple):
 
 
 def process_articles(
-    scrape_results: List[tns.ScrappedNewsResult],
-) -> Tuple[List[ProcessedNewsResult], List[tns.ScrappedNewsResult], List[str], List[str]]:
-    """
+    scrape_results: List[ScrappedNewsResult],
+) -> Tuple[
+        List[ProcessedNewsResult], List[ScrappedNewsResult],
+        List[str], List[str]
+]:
+    """ Returns the processed article, article, ticker and exchange.
 
+    Articles must refer to a single stock to be accepted.
 
     Param:
         scrape_results: List of scrapped Morning Star news content
-
     """
-    results = []
+    processed_results = []
     valid_scrape_results = []
     tickers = []
     exchanges = []
@@ -42,19 +45,27 @@ def process_articles(
                     article_keywords=article_keywords,
                     headline_keywords=headline_keywords,
                 )
-                results.append(processed_result)
+                processed_results.append(processed_result)
                 valid_scrape_results.append(scrape_result)
                 tickers.append(ticker)
                 exchanges.append(exchange)
-    return results, valid_scrape_results, tickers, exchanges
+    return processed_results, valid_scrape_results, tickers, exchanges
+
 
 def _process_ticker_code(ticker_code: str) -> Tuple[str, str]:
+    """ Returns the exchange and ticker from a ticker_code.
+
+    Params:
+        ticker_code: Ticker code found in news articles.
+            ex: "(<exchange>:<ticker>)"
+    """
     exchange_index = 0
     ticker_index = 1
     tmp = re.sub("[()]", "", ticker_code)
     tmp = tmp.split(":")
-    return tmp[exchange_index], tmp[ticker_index]
-
+    exchange = tmp[exchange_index]
+    ticker = tmp[ticker_index]
+    return exchange, ticker
 
 
 def _process_headline(headline: str) -> Dict:
@@ -67,11 +78,13 @@ def _process_headline(headline: str) -> Dict:
 
 
 def _process_content(content: str) -> Tuple[str, Dict]:
-    """ Searches article content for tickers and key words.
+    """ Returns tickers and key words from article content.
+
+    Note: Currently only accepting articles with 1 ticker
+        found from _find_ticker_codes.
 
     Param:
-        contents:
-        max_tickers:
+        content: Contents of article as a str.
     """
     ticker_codes = _find_ticker_codes(content)
     num_tickers = len(ticker_codes)
@@ -85,11 +98,14 @@ def _process_content(content: str) -> Tuple[str, Dict]:
 
 
 def _find_ticker_codes(content: str):
-    """ Searches for tickers in article that exist as (EXCHANGE:TICKER). """
+    """ Returns ticker codes found in articles as (EXCHANGE:TICKER).
+
+    Params:
+        content: Contents of article as a str.
+    """
     ticker_pattern = r"[(][A-Z]+[ ]*[:][ ]*[A-Z]+[)]"
     matches = re.findall(ticker_pattern, content)
     ticker_codes = []
     for match in matches:
         ticker_codes.append(match.replace(" ", ""))
     return ticker_codes
-

@@ -1,5 +1,11 @@
+""" Contains reused helper functions. """
+
 def format_millions_unit_to_str(val: float) -> str:
-    """ Returns a str short hand readable float value in the millions unit. """
+    """ Returns a str short hand readable float value in the millions unit.
+
+    Params:
+        val: Float value to be formatted as a str.
+    """
     unit = ""
     if val < 1000:
         unit = "M"
