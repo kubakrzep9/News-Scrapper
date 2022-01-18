@@ -1,3 +1,5 @@
+""" Contains config and handle to interface with twitter api. """
+
 from typing import NamedTuple
 from twython import Twython
 
@@ -18,10 +20,17 @@ class TwitterHandleConfig(NamedTuple):
 
 
 class TwitterHandle:
+    """ Class to interface with twitter api."""
+
     def __init__(
         self,
         config: TwitterHandleConfig
     ):
+        """ Initializes handle to twitter api.
+
+        Params:
+            config: Config object that contains secrets to access twitter api.
+        """
         print("creating twitter handle")
         self.twitter = Twython(
             config.api_key,
@@ -31,6 +40,11 @@ class TwitterHandle:
         )
 
     def make_post(self, message: str):
+        """ Makes a post on twitter.
+
+        Params:
+            message: Message to post on twitter.
+        """
         print("message length:", len(message))
         if len(message) > 280:
             print("Too many characters in post")

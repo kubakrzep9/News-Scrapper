@@ -2,7 +2,7 @@
 
 import os
 from news_scanner.twitter_handle.twitter_handle import TwitterHandleConfig
-from news_scanner.td_api.td_api import TDAPIConfig
+from news_scanner.td_api.td_api_handle import TDAPIConfig
 import subprocess
 from pathlib import Path
 
@@ -71,6 +71,7 @@ def _load_secrets(
     Params:
         export_secrets_script_path: Path to script file exporting secrets.
     """
+    print("loading secrets")
     if not export_secrets_script_path.is_file():
         raise ValueError(
             f"{SECRETS_SCRIPT_NOT_FOUND_ERROR} {export_secrets_script_path}"

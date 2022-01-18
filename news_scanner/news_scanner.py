@@ -5,7 +5,7 @@ from typing import List
 import twython.exceptions
 from news_scanner.news_scrapper.target_news_scrapper import TargetNewsScrapper
 from news_scanner.news_scrapper.article_processor import process_articles
-from news_scanner.td_api.td_api import TDApi
+from news_scanner.td_api.td_api_handle import TDApiHandle
 from news_scanner import util
 from news_scanner.logger.logger import logger
 from news_scanner.twitter_handle.twitter_handle import TwitterHandle
@@ -42,7 +42,7 @@ class NewsScanner:
             website_url=config.website_url,
             proxy_on=proxy_on
         )
-        self.td_api = TDApi(
+        self.td_api = TDApiHandle(
             config=config.tda_config
         )
         if twitter_on:
@@ -131,7 +131,6 @@ def _within_filter(news_report: NewsReport) -> bool:
     Params:
         news_report: NewsReport containing data to be compared against.
     """
-    print(news_report.stockData.market_cap)
     if news_report.stockData.market_cap > FILTER["market cap"] or \
             news_report.stockData.shares_outstanding > FILTER["shares outstanding"] or \
             news_report.stockData.last_price > FILTER["last price"]:

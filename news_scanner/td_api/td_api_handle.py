@@ -1,3 +1,5 @@
+""" Contains config, result object and handle to interface with td api. """
+
 from tda.auth import easy_client
 from selenium import webdriver
 import atexit
@@ -36,11 +38,18 @@ class StockData(NamedTuple):
     last_price: float = 0
 
 
-class TDApi:
+class TDApiHandle:
+    """ Class to interface with td api. """
+
     def __init__(
         self,
         config: TDAPIConfig
     ):
+        """ Initializes handle to td api.
+
+        Params:
+            config: Config object that contains secrets to access td api.
+        """
         self.client = easy_client(
             api_key=config.api_key,
             redirect_uri=config.redirect_uri,
@@ -49,6 +58,11 @@ class TDApi:
         )
 
     def get_stock_data(self, tickers: List[str]):
+        """ Returns list of specified stock data on tickers from td api.
+
+        Params:
+            tickers: List of tickers to retrieve specified stock data on.
+        """
         all_fundamentals = self._get_fundamentals(tickers)
         all_quotes = self._get_quotes(tickers)
         stock_data = {}
@@ -70,12 +84,22 @@ class TDApi:
         return stock_data
 
     def _get_fundamentals(self, tickers: List[str]):
+        """ Returns list of all fundamental stock data on tickers from td api.
+
+        Params:
+            tickers: List of tickers to retrieve all fundamental stock data on.
+        """
         resp = self.client.search_instruments(tickers, self.client.Instrument.Projection.FUNDAMENTAL)
         assert resp.status_code == httpx.codes.OK
         # print(resp.json())
         return resp.json()
 
     def _get_quotes(self, tickers: List[str]):
+        """ Returns list of stock quotes (pricing data) on tickers from td api.
+
+        Params:
+            tickers: List of tickers to retrieve quotes on.
+        """
         resp = self.client.get_quotes(tickers)
         assert resp.status_code == httpx.codes.OK
         # print(resp.json())
@@ -83,8 +107,7 @@ class TDApi:
 
 
 def _make_webdriver():
+    """ Function used to create a webdriver to send requests to td api. """
     driver = webdriver.Chrome()
     atexit.register(lambda: driver.quit())
     return driver
-
-

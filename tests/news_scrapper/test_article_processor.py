@@ -1,5 +1,8 @@
+""" Validates the article processor functions. """
+
 import pytest
-import news_scanner.news_scrapper.article_processor as msnp
+import news_scanner.news_scrapper.article_processor as ap
+
 
 @pytest.mark.parametrize(
     "content, true_tickers",
@@ -8,8 +11,14 @@ import news_scanner.news_scrapper.article_processor as msnp
         ("asdf asdf (NASDAQ: INNV) sag asdf ", ["(NASDAQ:INNV)"])
     ]
 )
-def test_find_tickers(content, true_tickers):
-    tickers = msnp._find_ticker_codes(content)
+def test_find_ticker_codes(content, true_tickers):
+    """ Ensures tickers codes can be identified.
+
+    Params:
+        content: Mock article content.
+        true_tickers: Expected ticker codes.
+    """
+    tickers = ap._find_ticker_codes(content)
     assert tickers == true_tickers
 
 
@@ -24,11 +33,19 @@ def test_find_tickers(content, true_tickers):
 def test_process_content_tickers(
     content: str, true_tickers: str
 ):
-    ticker, _ = msnp._process_content(content)
+    """ Ensures articles are processed properly.
+
+    Params:
+        content: Mock article content.
+        true_tickers: Expected ticker codes.
+    """
+    ticker, _ = ap._process_content(content)
     assert ticker == true_tickers
 
+
 def test_process_ticker_codes():
+    """ Ensures ticker codes can be processed. """
     ticker_code = "(NYSE:TSLA)"
-    exchange, ticker = msnp._process_ticker_code(ticker_code)
+    exchange, ticker = ap._process_ticker_code(ticker_code)
     assert exchange == "NYSE"
     assert ticker == "TSLA"
