@@ -1,13 +1,8 @@
 """ Validates functionality of 'Config' class. """
 
 import os
-from news_scanner.config import (
-    Config,
-    _load_secrets,
-    SECRETS_SCRIPT_NOT_FOUND_ERROR
-)
+from news_scanner.config import Config, SECRETS_NOT_FOUND
 from unittest import mock
-from pathlib import Path
 import pytest
 
 CONFIG_ENV_VARS = {
@@ -23,8 +18,42 @@ CONFIG_ENV_VARS = {
 }
 
 
-def test_config_init():
-    """ Ensures config object is properly set. """
+class MockLoadDotenv:
+    """ Used to mock dotenv.load_dotenv. """
+    def __call__(self):
+        pass
+
+
+class MockIsFileTrue:
+    """ Used to mock pathlib.Path.is_file. """
+    def __call__(self):
+        return True
+
+
+class MockIsFileFalse:
+    """ Used to mock pathlib.Path.is_file. """
+    def __call__(self):
+        return False
+
+
+# callable functions to mock functions
+mock_load_dotenv = MockLoadDotenv
+mock_is_file_true = MockIsFileTrue
+mock_is_file_false = MockIsFileFalse
+
+
+@mock.patch('pathlib.Path.is_file', new_callable=mock_is_file_true)
+@mock.patch('dotenv.load_dotenv', new_callable=mock_load_dotenv)
+def test_init(mock_func1, mock_func2):
+    """ Ensures config object is properly set from .env file.
+
+    Mocker is used to mock the functions used to extract env vars from a .env
+    file. Instead, another mocker patches test env vars.
+
+    Params:
+        mock_func1: not used.
+        mock_func2: not used.
+    """
     with mock.patch.dict(os.environ, CONFIG_ENV_VARS):
         config = Config()
         assert config.website_url == Config._WEBSITE_URL.lower()
@@ -37,10 +66,12 @@ def test_config_init():
                Config._TWITTER_ACCESS_TOKEN_SECRET.lower()
 
 
-def test_load_secrets_no_script():
-    """ Ensures a script exists to export secrets. """
-    script_path = Path(__file__).parent / "export_secrets.sh"
-    with pytest.raises(ValueError, match=rf".*{SECRETS_SCRIPT_NOT_FOUND_ERROR}.*" ):
-        _load_secrets(
-            export_secrets_script_path=script_path
-        )
+@mock.patch('pathlib.Path.is_file', new_callable=mock_is_file_false)
+def test_init_no_secrets(mock_func):
+    """ Ensures exception is raised if .env file is missing.
+
+    Params:
+        mock_func: not used.
+    """
+    with pytest.raises(ValueError, match=rf".*{SECRETS_NOT_FOUND}.*" ):
+       config = Config()
