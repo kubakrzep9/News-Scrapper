@@ -17,6 +17,7 @@ from typing import List
 
 @pytest.fixture(scope="session")
 def tdapi_handle() -> TDApiHandle:
+    """ Object to interface td api. Built once when test file is run. """
     load_dotenv()
     return TDApiHandle(
         config=TDAPIConfig(
