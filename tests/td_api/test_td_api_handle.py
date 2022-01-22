@@ -1,4 +1,4 @@
-""" Validates Class, 'TDApiHandle', interfacing td api. """
+""" Validates 'TDApiHandle', which interfaces the td api. """
 
 import selenium.webdriver.chrome.webdriver
 
