@@ -102,7 +102,6 @@ def test_get_quotes(
 
     assert isinstance(quotes, dict)
     assert len(quotes) == len(tickers)
-
     for ticker in quotes:
         assert ticker in tickers
         assert isinstance(quotes[ticker][tdapi_handle.LAST_PRICE], float)
