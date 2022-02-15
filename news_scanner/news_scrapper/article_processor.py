@@ -104,8 +104,15 @@ def _find_ticker_codes(content: str):
         content: Contents of article as a str.
     """
     ticker_pattern = r"[(][A-Z]+[ ]*[:][ ]*[A-Z]+[)]"
-    matches = re.findall(ticker_pattern, content)
+    ticker_pattern2 = r"[[][A-Z]+[ ]*[:][ ]*[A-Z]+[]]"
     ticker_codes = []
-    for match in matches:
-        ticker_codes.append(match.replace(" ", ""))
+    for pattern in [ticker_pattern2, ticker_pattern]:
+        print(pattern)
+        matches = re.findall(pattern, content)
+        if matches:
+            for match in matches:
+                ticker_codes.append(match.replace(" ", ""))
+
+        print(matches)
+    print(matches)
     return ticker_codes
