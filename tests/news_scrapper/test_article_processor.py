@@ -29,6 +29,8 @@ def test_find_ticker_codes(content, true_tickers):
     "content, true_tickers",
     [
         ("asdf daf (NYSE:ABBA) daf (NYSE:TSLA) daf daf", None),
+        ("asdf daf (NYSE:ABBA) daf (NYSE:ABBAW) daf daf", "(NYSE:ABBA)"),
+        ("asdf daf (NYSE:TSLAW) daf (NYSE:TSLA) daf daf", "(NYSE:TSLA)"),
         ("asdf daf (NYSE:ABBA) daf daf daf", "(NYSE:ABBA)"),
         ("asdf daf daf daf", None),
     ]
@@ -42,7 +44,10 @@ def test_process_content_tickers(
         content: Mock article content.
         true_tickers: Expected ticker codes.
     """
+
     ticker, _ = ap._process_content(content)
+    #print(ticker)
+    #print(true_tickers)
     assert ticker == true_tickers
 
 

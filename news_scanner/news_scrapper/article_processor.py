@@ -88,16 +88,30 @@ def _process_content(content: str) -> Tuple[str, Dict]:
     """
     ticker_codes = _find_ticker_codes(content)
     num_tickers = len(ticker_codes)
-    if num_tickers != 1:
-        return None, None
 
+    if num_tickers == 1:
     # Find key words
-    key_words = {}
-    ticker = ticker_codes[0]
-    return ticker, key_words
+        key_words = {}
+        ticker = ticker_codes[0]
+        return ticker, key_words
+    # conditional statement checking whether articles include warrants
+    elif num_tickers == 2:
+        key_words = {}
+        _, ticker = _process_ticker_code(ticker_codes[0])
+        _, ticker2 = _process_ticker_code(ticker_codes[1])
+        if abs(len(ticker) - len(ticker2)) == 1:
+            if len(ticker) > len(ticker2):
+                if ticker2 == ticker[:-1] and ticker[-1] == 'W':
+                    return ticker_codes[1], key_words
+            elif ticker == ticker2[:-1] and ticker2[-1] == 'W':
+                return ticker_codes[0], key_words
+
+    return None, None
 
 
-def _find_ticker_codes(content: str):
+
+
+def _find_ticker_codes(content: str) -> List[str]:
     """ Returns ticker codes found in articles as (EXCHANGE:TICKER).
 
     Params:
