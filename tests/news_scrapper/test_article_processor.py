@@ -8,7 +8,8 @@ import news_scanner.news_scrapper.article_processor as ap
     "content, true_tickers",
     [
         ("asdf daf  daf (NYSE:TSLA) daf daf", ["(NYSE:TSLA)"]),
-        ("asdf asdf (NASDAQ: INNV) sag asdf ", ["(NASDAQ:INNV)"])
+        ("asdf asdf (NASDAQ: INNV) sag asdf ", ["(NASDAQ:INNV)"]),
+        ("asdf daf [NYSE:ABBA] daf daf daf", ["[NYSE:ABBA]"]),
     ]
 )
 def test_find_ticker_codes(content, true_tickers):
@@ -20,6 +21,8 @@ def test_find_ticker_codes(content, true_tickers):
     """
     tickers = ap._find_ticker_codes(content)
     assert tickers == true_tickers
+
+
 
 
 @pytest.mark.parametrize(
