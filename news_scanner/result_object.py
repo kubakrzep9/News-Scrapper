@@ -6,6 +6,14 @@ from news_scanner.td_api.td_api_handle import StockData
 from typing import NamedTuple
 
 
+class NameData(NamedTuple):
+    ticker: str = "ticker"
+    exchange: str = "exchange"
+
+
+ALLOWED_NAMED_TUPLES = [ScrappedNewsResult, StockData, NameData]
+
+
 class NewsReport(NamedTuple):
     """ Result object of scrapped news articles.
 
@@ -16,8 +24,7 @@ class NewsReport(NamedTuple):
         ticker: Stock symbol.
         exchange: Exchange stock is traded on.
     """
-    scrappedNewsResults: ScrappedNewsResult = ScrappedNewsResult
-    processedNewsResults: ProcessedNewsResult = ProcessedNewsResult
-    stockData: StockData = StockData
-    ticker: str = "ticker"
-    exchange: str = "exchange"
+    scrappedNewsResults: ScrappedNewsResult = ScrappedNewsResult()
+    # processedNewsResults: ProcessedNewsResult = ProcessedNewsResult()
+    stockData: StockData = StockData()
+    nameData: NameData = NameData()

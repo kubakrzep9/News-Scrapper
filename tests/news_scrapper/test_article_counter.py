@@ -5,7 +5,7 @@ Written by: Bart Nowobilski.
 
 from news_scanner.news_scrapper.article_counter import ArticleCounter
 import pytest
-from news_scanner.news_scanner import NewsReport
+from news_scanner.result_object import NewsReport, NameData
 from typing import List, Dict
 
 
@@ -15,11 +15,11 @@ from typing import List, Dict
         # first case
         (
             [
-                NewsReport(ticker="XYZ"),
-                NewsReport(ticker="ABC"),
-                NewsReport(ticker="NOWO"),
-                NewsReport(ticker="AAA"),
-                NewsReport(ticker="XYZ"),
+                NewsReport(nameData=NameData(ticker="XYZ")),
+                NewsReport(nameData=NameData(ticker="ABC")),
+                NewsReport(nameData=NameData(ticker="NOWO")),
+                NewsReport(nameData=NameData(ticker="AAA")),
+                NewsReport(nameData=NameData(ticker="XYZ")),
             ],
             {
                 "XYZ": 2,
@@ -51,14 +51,14 @@ def test_article_counter(
 def test_article_counter_updated():
     """" Ensures article counter is updated properly. """
     news_reports_1 = [
-        NewsReport(ticker="XYZ"),
-        NewsReport(ticker="ABC"),
-        NewsReport(ticker="NOWO"),
-        NewsReport(ticker="AAA"),
-        NewsReport(ticker="XYZ"),
+        NewsReport(nameData=NameData(ticker="XYZ")),
+        NewsReport(nameData=NameData(ticker="ABC")),
+        NewsReport(nameData=NameData(ticker="NOWO")),
+        NewsReport(nameData=NameData(ticker="AAA")),
+        NewsReport(nameData=NameData(ticker="XYZ")),
     ]
     news_reports_2 = [
-        NewsReport(ticker="XYZ"),
+        NewsReport(nameData=NameData(ticker="XYZ")),
     ]
     expected_runtime_article_counts = {
         "XYZ": 3,

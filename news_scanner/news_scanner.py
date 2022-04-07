@@ -9,9 +9,8 @@ from news_scanner.td_api.td_api_handle import TDApiHandle
 from news_scanner import util
 from news_scanner.logger.logger import logger
 from news_scanner.twitter_handle.twitter_handle import TwitterHandle
-from news_scanner.database_handles.stock_data_processed_news_handle import StockDataProcessedNewsHandle
-from news_scanner.database_handles.power_switch_handle import PowerSwitchHandle
-from news_scanner.result_object import NewsReport
+from news_scanner.database.database_handles.power_switch_handle import PowerSwitchHandle
+from news_scanner.result_object import NewsReport, NameData
 from news_scanner.config import Config
 
 
@@ -49,7 +48,6 @@ class NewsScanner:
             self.twitter_handle = TwitterHandle(
                 config=config.twitter_config
             )
-        self.database_handle = StockDataProcessedNewsHandle()
         self.powerswitch_handle = PowerSwitchHandle()
 
     def run(self):
@@ -77,17 +75,19 @@ class NewsScanner:
                         processed_results, scrape_results, tickers, exchanges
                 ):
                     news_report = NewsReport(
-                            ticker=ticker,
-                            exchange=exchange,
+                            nameData=NameData(
+                                ticker=ticker,
+                                exchange=exchange
+                            ),
                             scrappedNewsResults=scrape_result,
-                            processedNewsResults=processed_result,
+                            # processedNewsResults=processed_result,
                             stockData=stock_data[ticker]
                         )
                     if _within_filter(news_report):
                         news_reports.append(news_report)
 
                 # store to database
-                #self.database_handle.insert(news_reports)
+                self.database_handle.insert(news_reports)
 
                 # output results
                 num_accepted = len(news_reports)
@@ -114,8 +114,8 @@ class NewsScanner:
 
         for report in most_recent_reports:
             output = f"{report.scrappedNewsResults.link}\n" \
-                f"- published: {report.scrappedNewsResults.publish_date.strftime('%b %d %Y %I:%M %p')}\n" \
-                f"- ticker: {report.ticker}\n" \
+                f"- published: {report.scrappedNewsResults.publish_date}\n" \
+                f"- ticker: {report.nameData.ticker}\n" \
                 f"- market cap: ${util.format_millions_unit_to_str(report.stockData.market_cap)}\n" \
                 f"- shares outstanding: {util.format_millions_unit_to_str(report.stockData.shares_outstanding)}\n" \
                 f"- last price: ${report.stockData.last_price}\n\n"
@@ -148,9 +148,9 @@ def _console_logger_output(news_reports: List[NewsReport]) -> None:
     for report in news_reports:
         output_str += f"News Article\n" \
                        f"- link: {report.scrappedNewsResults.link}\n" \
-                       f"- published: {report.scrappedNewsResults.publish_date.strftime('%b %d %Y %I:%M %p')}\n" \
-                       f"- ticker: {report.ticker}\n" \
-                       f"- exchange: {report.exchange}\n" \
+                       f"- published: {report.scrappedNewsResults.publish_date}\n" \
+                       f"- ticker: {report.nameData.ticker}\n" \
+                       f"- exchange: {report.nameData.exchange}\n" \
                        f"- market cap: ${util.format_millions_unit_to_str(report.stockData.market_cap)}\n" \
                        f"- market cap float: ${util.format_millions_unit_to_str(report.stockData.market_cap_float)}\n" \
                        f"- shares outstanding: {util.format_millions_unit_to_str(report.stockData.shares_outstanding)}\n" \
