@@ -1,5 +1,6 @@
 """ Contains reused helper functions. """
 
+
 def format_millions_unit_to_str(val: float) -> str:
     """ Returns a str short hand readable float value in the millions unit.
 
@@ -20,3 +21,4 @@ def format_millions_unit_to_str(val: float) -> str:
     rounded_val = round(val, 2)
     formatted_str = str(rounded_val)+unit
     return formatted_str
+

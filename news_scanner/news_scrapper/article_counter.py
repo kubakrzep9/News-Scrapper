@@ -19,7 +19,7 @@ class ArticleCounter:
             news_reports: List of NewsReport.
         """
         for news_report in news_reports:
-            key = news_report.ticker
+            key = news_report.nameData.ticker
             if key in self.runtime_article_counts:
                 self.runtime_article_counts[key] += 1
             else:

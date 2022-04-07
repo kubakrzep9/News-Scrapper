@@ -5,7 +5,7 @@ from selenium import webdriver
 import requests
 from typing import List, Tuple, NamedTuple
 from datetime import datetime, timedelta
-from news_scanner.proxy.proxy_constants import PROXY_OPTIONS
+from news_scanner.news_scrapper.proxy.proxy_constants import PROXY_OPTIONS
 from news_scanner.logger.logger import logger
 
 TIME_FORMAT = "%b %d, %Y %I:%M %p %Z"
@@ -58,7 +58,10 @@ class TargetNewsScrapper:
             publish_dates[0:latest_index], contents
         ):
             result = ScrappedNewsResult(
-                headline, link, publish_date, content
+                headline=headline,
+                link=link,
+                publish_date=publish_date.strftime('%b %d %Y %I:%M %p'),
+                content=content
             )
             results.append(result)
             self.viewed_links.append(link)

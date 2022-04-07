@@ -32,10 +32,10 @@ class StockData(NamedTuple):
             registered by a company
         last_price: The last price the stock was registered at.
     """
-    market_cap: float = 0
-    market_cap_float: float = 0
-    shares_outstanding: int = 0
-    last_price: float = 0
+    market_cap: float = 0.01
+    market_cap_float: float = 0.01
+    shares_outstanding: float = 0.01
+    last_price: float = 0.01
 
 
 class TDApiHandle:
