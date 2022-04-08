@@ -50,7 +50,7 @@ def get_name(nt_name: str) -> str:
 def extract_attrs(
         complex_nt: NamedTuple,
         allowed_data_types: List,
-        allowed_named_tuples: List[NamedTuple] = None,
+        allowed_named_tuples: List[type] = None,
         attr_pool_values: Dict = None,
         attr_pool_dtypes: Dict = None,
 ) -> Tuple[Dict, Dict]:
