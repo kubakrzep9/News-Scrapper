@@ -89,34 +89,38 @@ class BaseDatabaseHandle(BaseHandle):
                 db_dir=db_dir
             )
 
-    def insert(self, complex_nt, throw_exception: bool = True):
+    def insert(self, insert_data: List, throw_exception: bool = True):
         """ """
-        validate_complex_nt_obj(
-            complex_nt=complex_nt,
-            expected_complex_nt_type=self.db_object_config.complex_nt_type,
-            expected_allowed_namedtuples=self.db_object_config.allowed_namedtuples
-        )
+        if type(insert_data) != list:
+            insert_data = [insert_data]
 
-        success_set = []
-        primary_key = self.get_next_primary_key()
+        for complex_nt in insert_data:
+            validate_complex_nt_obj(
+                complex_nt=complex_nt,
+                expected_complex_nt_type=self.db_object_config.complex_nt_type,
+                expected_allowed_namedtuples=self.db_object_config.allowed_namedtuples
+            )
 
-        try:
-            for namedtuple in complex_nt:
-                nt_name = get_namedtuple_name(namedtuple)
-                self.table_handles[nt_name].insert(
-                    named_tuple=namedtuple,
-                    primary_key=primary_key
-                )
-                success_set.append(nt_name)
-        except Exception as e:
-            # transactional insert, remove successful inserts prior to failed insert
-            for nt_name in success_set:
-                self.table_handles[nt_name].remove(primary_key)
-            if throw_exception:
-                raise e
-            else:
-                # LOG DATABASE INSERT FAIL
-                print(str(e))
+            success_set = []
+            primary_key = self.get_next_primary_key()
+
+            try:
+                for namedtuple in complex_nt:
+                    nt_name = get_namedtuple_name(namedtuple)
+                    self.table_handles[nt_name].insert(
+                        named_tuple=namedtuple,
+                        primary_key=primary_key
+                    )
+                    success_set.append(nt_name)
+            except Exception as e:
+                # transactional insert, remove successful inserts prior to failed insert
+                for nt_name in success_set:
+                    self.table_handles[nt_name].remove(primary_key)
+                if throw_exception:
+                    raise e
+                else:
+                    # LOG DATABASE INSERT FAIL
+                    print(str(e))
 
     def get_next_primary_key(self):
         """ Checks each table to ensure they agree on next primary key. """

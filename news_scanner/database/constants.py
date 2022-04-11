@@ -1,6 +1,7 @@
 
 from pathlib import Path
 
+# ../News-Scrapper/databases
 DB_DIR = Path(__file__).parent.parent.parent / "databases"
 
 INVALID_DATATYPE = "Error: datatype not accepted. Only int, float, str."

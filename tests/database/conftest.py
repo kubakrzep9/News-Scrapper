@@ -2,9 +2,10 @@ from typing import NamedTuple, List
 import pytest
 from pathlib import Path
 
+# ../tests/
 TEST_DIR = Path(__file__).parent.parent
+# ../tests/database/test_databases
 TEST_DB_DIR = Path(__file__).parent / "test_databases"
-
 
 
 class WrongNamedTuple(NamedTuple):

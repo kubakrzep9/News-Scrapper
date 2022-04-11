@@ -63,7 +63,7 @@ def test_insert_and_get_all(complexnt_handle, complexnt_testobjs, num_insert):
     complex_nts = {}
     i = 1
     for test_obj in complexnt_testobjs[:num_insert]:
-        complexnt_handle.insert(complex_nt=test_obj)
+        complexnt_handle.insert(insert_data=test_obj)
         complex_nts[i] = test_obj
         i += 1
 
@@ -115,18 +115,16 @@ def test_insert_invalid_subcomplexnt(
     if throw_exception:
         # Can be any exception, want to ensure next primary key matches in each tables
         with pytest.raises(ValueError) as exec_info:
-            for complex_nt in complexnts_to_insert:
-                complexnt_handle.insert(
-                    complex_nt=complex_nt,
-                    throw_exception=throw_exception
-                )
-    # print/log exception and continue
-    else:
-        for complex_nt in complexnts_to_insert:
             complexnt_handle.insert(
-                complex_nt=complex_nt,
+                insert_data=complexnts_to_insert,
                 throw_exception=throw_exception
             )
+    # print/log exception and continue
+    else:
+        complexnt_handle.insert(
+            insert_data=complexnts_to_insert,
+            throw_exception=throw_exception
+        )
 
     # get and ensure each tables last primary key matches
     assert complexnt_handle.get_next_primary_key() == expected_val
@@ -136,11 +134,8 @@ def test_insert_invalid_subcomplexnt(
 def test_remove(complexnt_handle, complexnt_testobjs):
     assert len(complexnt_testobjs) == 3  # test configured for 3
 
-    for complex_nt in complexnt_testobjs:
-        complexnt_handle.insert(complex_nt=complex_nt)
-
+    complexnt_handle.insert(insert_data=complexnt_testobjs)
     complexnt_handle.remove([1, 3])
-
     db_table_data = complexnt_handle.get_all()
 
     for table_name, table_df in db_table_data.items():
