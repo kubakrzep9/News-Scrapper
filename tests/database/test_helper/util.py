@@ -70,10 +70,12 @@ def compare_complex_nt_obj_to_df(
     complex_nts: Dict[int, NamedTuple],
     df: pd.DataFrame,
     allowed_data_types: List = PYTHON_TO_SQL_DTYPES,
-    allowed_named_tuples: List[NamedTuple] = [],
+    allowed_named_tuples: List[type] = [],
     index_name: str = None
 ) -> None:
     """ Returns true if complex object attrs match respective df values.
+
+    Validates a table in the database.
 
     complex: A NamedTuple object that has NamedTuple attributes.
     """
@@ -102,21 +104,28 @@ def compare_complex_nt_obj_to_df(
     assert generated_df.equals(df)
 
 
-def extract_sub_complexnt(complex_nts: List) -> Dict:
+def extract_sub_complexnt(
+    complex_nts: List,
+    index_list: List = None
+) -> Dict[str, Dict[int, NamedTuple]]:
     """ Returns a dict where keys are names of sub complext_nts and values are lists of their values. """
+    if index_list:
+        assert len(complex_nts) == len(index_list)
+    else:
+        index_list = [i for i in range(1, len(complex_nts) + 1)]
+
     # setting up results dict
     sub_complexnt_data = {}
     complex_nt = complex_nts[0]
     for sub_complexnt in complex_nt:
         sub_nt_name = get_namedtuple_name(sub_complexnt)
+        # dict for each subcomplexnt (table)
         sub_complexnt_data[sub_nt_name] = {}
 
     # extracting sub_complexnt data
-    i = 1
-    for complex_nt in complex_nts:
+    for complex_nt, key in zip(complex_nts, index_list):
         for sub_complexnt in complex_nt:
             sub_nt_name = get_namedtuple_name(sub_complexnt)
-            sub_complexnt_data[sub_nt_name][i] = sub_complexnt
-        i += 1
+            sub_complexnt_data[sub_nt_name][key] = sub_complexnt
 
     return sub_complexnt_data

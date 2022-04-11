@@ -3,6 +3,8 @@ from typing import List
 from news_scanner.result_object import NewsReport, StockData, ScrappedNewsResult, NameData, ALLOWED_NAMED_TUPLES
 from news_scanner.database.database_handles.newsreport_database_handle import NewsReportDatabaseHandle
 from tests.database.test_helper.database_handle_validator import validate_database_handle
+from tests.database.test_helper.util import tear_down
+from tests.database.conftest import TEST_DB_DIR
 
 
 def insert_data(
@@ -35,9 +37,11 @@ def insert_data(
 
 
 def test_newsreport_database_handle():
-    print()
+    tear_down()
     validate_database_handle(
-        database_handle=NewsReportDatabaseHandle(),
+        database_handle=NewsReportDatabaseHandle(
+            db_dir=TEST_DB_DIR
+        ),
         insert_data=insert_data(),
         allowed_namedtuples=ALLOWED_NAMED_TUPLES,
     )
