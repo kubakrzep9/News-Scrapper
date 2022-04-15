@@ -7,15 +7,32 @@ from news_scanner.news_scrapper.target_news_scrapper import ScrappedNewsResult
 ALLOWED_EXCHANGES = ["NASDAQ", "NYSE"]   # OTC, pink sheets?
 
 
+class WordCount(NamedTuple):
+    """ Keeps track of the number of occurrences of a word.
+
+    Attrs:
+        word: Word to track.
+        count: Number of occurences of a word.
+
+    """
+    word: str = "word"
+    count: int = 0
+
+
 class ProcessedNewsResult(NamedTuple):
     """ Result object containing processed article data.
 
     Attrs:
         article_keywords: Keywords found in article content.
         headline_keywords: Keywords found in headline.
+        sentiment: Rating between -1 to 1 indicating whether an article
+            is positive or negative.
+        article_type: Category indicating the article type.
     """
-    article_keywords: Dict = {}
-    headline_keywords: Dict = {}
+    article_keywords: List[WordCount] = [WordCount()]
+    headline_keywords: List[WordCount] = [WordCount()]
+    sentiment: float = 0.01
+    article_type: str = "article_type"
 
 
 def process_articles(
@@ -29,7 +46,7 @@ def process_articles(
     Articles must refer to a single stock to be accepted.
 
     Param:
-        scrape_results: List of scrapped Morning Star news content
+        scrape_results: List of scrapped news content
     """
     processed_results = []
     valid_scrape_results = []

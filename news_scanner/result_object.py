@@ -25,6 +25,6 @@ class NewsReport(NamedTuple):
         exchange: Exchange stock is traded on.
     """
     scrappedNewsResults: ScrappedNewsResult = ScrappedNewsResult()
-    # processedNewsResults: ProcessedNewsResult = ProcessedNewsResult()
+    #processedNewsResults: ProcessedNewsResult = ProcessedNewsResult()
     stockData: StockData = StockData()
     nameData: NameData = NameData()

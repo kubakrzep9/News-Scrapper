@@ -6,6 +6,8 @@ from typing import NamedTuple, Dict, List, Tuple, Any
 DTYPE = "dtype"
 VALUE = "value"
 NAMEDTUPLE = "namedtuple"
+NAMED_TUPLE_DTYPE = "named_tuple_dtype"
+EXTENDED_DATA_VALUE = "value"
 
 ERROR_INVALID_NT_NAME = "Error: nt_name must contain only letters or numbers."
 ERROR_FIRST_UPPER = "Error nt_name's first letter must be uppercase."
@@ -16,6 +18,7 @@ INVALID_COMPLEX_NT_OBJ_TYPE = "Error: the complex_nt type does not match the exp
 ATTR_TYPE_MISMATCH = "Error: an attribute type does not match the expected DBObjectConfig.allowed_dtypes."
 NAMEDTUPLE_NAME_NOT_FOUND = "Error: no namedtuple name found."
 INVALID_COMPLEX_NT_ROOT_TYPE = "Error: complexnt_type must be a class which inherits from NamedTuple."
+INVALID_EXTENDED_DTYPE = "Error: extended_data type not found in allowed namedtuples list."
 
 
 def get_datatype(value: Any, allowed_dtypes: Dict, allowed_namedtuples: List = []) -> str:
@@ -51,33 +54,33 @@ def extract_attrs(
         complex_nt: NamedTuple,
         allowed_data_types: List,
         allowed_named_tuples: List[type] = None,
-        attr_pool_values: Dict = None,
-        attr_pool_dtypes: Dict = None,
-) -> Tuple[Dict, Dict]:
-    # initializing default values
+) -> Tuple[Dict, Dict, Dict]:
+    """ Extracts values and data types for complex_nts.
+
+        Will identify extended data but will not extract its attributes
+        values and data types.
+    """
     if not allowed_named_tuples:
         allowed_named_tuples = []
-    if not attr_pool_values:
-        attr_pool_values = {}
-    if not attr_pool_dtypes:
-        attr_pool_dtypes = {}
 
-    attr_pool_values, attr_pool_dtypes = _extract_attrs(
+    attr_pool_values, attr_pool_dtypes, extended_data = _extract_attrs(
         complex_nt=complex_nt,
         allowed_data_types=allowed_data_types,
         allowed_named_tuples=allowed_named_tuples,
-        attr_pool_values=attr_pool_values,
-        attr_pool_dtypes=attr_pool_dtypes
+        attr_pool_values={},
+        attr_pool_dtypes={},
+        extended_data={},
     )
-    return attr_pool_values, attr_pool_dtypes
+    return attr_pool_values, attr_pool_dtypes, extended_data
 
 
 def _extract_attrs(
     complex_nt: NamedTuple,
     allowed_data_types: List,
     allowed_named_tuples: List[type],
-    attr_pool_values: Dict,
-    attr_pool_dtypes: Dict,
+    attr_pool_values: Dict[str, Any],
+    attr_pool_dtypes: Dict[str, type],
+    extended_data: Dict[str, Any]
 ):
     """ Recursive"""
     for attr_name, attr_value in zip(complex_nt._fields, complex_nt):
@@ -89,16 +92,27 @@ def _extract_attrs(
                 allowed_data_types=allowed_data_types,
                 attr_pool_values=attr_pool_values,
                 attr_pool_dtypes=attr_pool_dtypes,
+                extended_data=extended_data,
             )
         elif attr_type in allowed_data_types:
             if attr_name in attr_pool_values.keys():
                 raise ValueError(f"{DUPLICATE_ATTR_NAME} ('{attr_name}')")
+            elif attr_type == list:
+                extended_data_type = type(attr_value[0])
+                # Validate
+                # extended_data must be a named tuple
+                if extended_data_type not in allowed_named_tuples:
+                    raise ValueError(f"{INVALID_EXTENDED_DTYPE} ('{attr_name}')")
+                extended_data[attr_name] = {
+                    NAMED_TUPLE_DTYPE: extended_data_type,
+                    EXTENDED_DATA_VALUE: attr_value
+                }
             else:
                 attr_pool_values[attr_name] = attr_value
                 attr_pool_dtypes[attr_name] = attr_type
         else:
             raise ValueError(f"{INVALID_DATA_TYPE} ('{attr_type}")
-    return attr_pool_values, attr_pool_dtypes
+    return attr_pool_values, attr_pool_dtypes, extended_data
 
 
 def validate_complex_nt_schema(

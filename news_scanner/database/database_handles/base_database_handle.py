@@ -14,7 +14,7 @@ from news_scanner.database.constants import (
     DB_DIR
 )
 from news_scanner.database.base_handle import BaseHandle
-from news_scanner.database.table_handles.base_table_handle import BaseTableHandle, TableData
+from news_scanner.database.table_handles.base_table_handle import BaseTableHandle, TableConfig
 
 
 DB_PK_ERROR = "Error: primary keys do not match in database tables."
@@ -81,7 +81,7 @@ class BaseDatabaseHandle(BaseHandle):
         for namedtuple in self.def_db_obj_instance:
             nt_name = get_namedtuple_name(namedtuple)
             self.table_handles[nt_name] = BaseTableHandle(
-                table_data=TableData(
+                table_config=TableConfig(
                     named_tuple_type=type(namedtuple),
                     allowed_namedtuples=self.db_object_config.allowed_namedtuples
                 ),
@@ -89,7 +89,7 @@ class BaseDatabaseHandle(BaseHandle):
                 db_dir=db_dir
             )
 
-    def insert(self, insert_data: List, throw_exception: bool = True):
+    def insert(self, insert_data: List[NamedTuple], throw_exception: bool = True):
         """ """
         if type(insert_data) != list:
             insert_data = [insert_data]

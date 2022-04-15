@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import NamedTuple
 from news_scanner.database.table_handles.base_table_handle import (
     BaseTableHandle,
-    TableData,
+    TableConfig,
     DB_DIR
 )
 from news_scanner.database.util import get_name
@@ -25,7 +25,7 @@ class PowerSwitch(NamedTuple):
 FORMATTED_NAME = get_name(PowerSwitch.__name__)
 DB_FILE_NAME = f"{FORMATTED_NAME}.sqlite"
 
-TABLE_DATA = TableData(
+TABLE_DATA = TableConfig(
     named_tuple_type=PowerSwitch,
     table_name=FORMATTED_NAME,
     primary_key=ID
@@ -48,7 +48,7 @@ class PowerSwitchHandle(BaseTableHandle):
 
         """
         super().__init__(
-            table_data=TABLE_DATA,
+            table_config=TABLE_DATA,
             db_file_name=db_file_name,
             db_dir=db_dir
         )  # must be first
@@ -72,13 +72,13 @@ class PowerSwitchHandle(BaseTableHandle):
         mode = 0
         if on:
             mode = 1
-        query = f"UPDATE {self.table_data.table_name} SET {POWER} = {mode}" \
+        query = f"UPDATE {self.table_config.table_name} SET {POWER} = {mode}" \
                 f" WHERE {ID} = {self._power_index}"
         self.execute_query(query)
 
     def power_on(self) -> bool:
         """ Returns true if the table indicates the system power is on. """
-        query = f"SELECT {ID}, {POWER} FROM {self.table_data.table_name}"
+        query = f"SELECT {ID}, {POWER} FROM {self.table_config.table_name}"
         result = self.execute_query(query)
         df = pd.DataFrame(result, columns=[ID, POWER])
         if df.iloc[self._power_index][POWER] == ON:

@@ -83,10 +83,8 @@ def compare_complex_nt_obj_to_df(
     attr_pool_dtypes = {}
 
     for key_id in complex_nts.keys():
-        attr_pool_values, attr_pool_dtypes = extract_attrs(
+        attr_pool_values, attr_pool_dtypes, _ = extract_attrs(
             complex_nt=complex_nts[key_id],
-            attr_pool_values={},
-            attr_pool_dtypes={},
             allowed_named_tuples=allowed_named_tuples,
             allowed_data_types=allowed_data_types
         )

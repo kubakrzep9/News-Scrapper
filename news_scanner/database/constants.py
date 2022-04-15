@@ -11,7 +11,8 @@ MISSING_ALLOWED_NTS = "Error: found complex_nt, missing allowed_named_tuples."
 PYTHON_TO_SQL_DTYPES = {
     int: "INTEGER",
     float: "REAL",
-    str: "TEXT"
+    str: "TEXT",
+    list: "EXTENDED"
 }
 
 DEF_PRIMARY_KEY = "agg_id"

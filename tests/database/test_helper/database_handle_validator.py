@@ -18,7 +18,7 @@ def _validate_database_init(
     complex_nt = insert_data[0]
     for namedtuple in complex_nt:
         nt_name = get_namedtuple_name(namedtuple)
-        _, attr_pool_dtypes = extract_attrs(
+        _, attr_pool_dtypes, _ = extract_attrs(
             complex_nt=namedtuple,
             allowed_data_types=allowed_dtypes,
             allowed_named_tuples=allowed_namedtuples

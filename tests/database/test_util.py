@@ -86,7 +86,7 @@ def test_extract_attrs():
     }
 
     for namedtuple in [complexnt.namedtuple1, complexnt.namedtuple2]:
-        attr_pool_values, attr_pool_dtypes = extract_attrs(
+        attr_pool_values, attr_pool_dtypes, _ = extract_attrs(
             complex_nt=namedtuple,
             allowed_named_tuples=ALLOWED_NAMED_TUPLES,
             allowed_data_types=ALLOWED_DATA_TYPES
@@ -105,7 +105,6 @@ def test_extract_attrs_duplicate_attr_name():
             complex_nt=DuplicateAttr(),
             allowed_named_tuples=ALLOWED_NAMED_TUPLES,
             allowed_data_types=ALLOWED_DATA_TYPES,
-            attr_pool_values={},
         )
 
 
