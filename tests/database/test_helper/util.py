@@ -7,7 +7,7 @@ import numpy as np
 from news_scanner.database.util import extract_attrs, get_namedtuple_name
 from news_scanner.database.constants import PYTHON_TO_SQL_DTYPES
 from tests.database.conftest import TEST_DIR
-
+from news_scanner.database.table_handles.base_table_handle import BaseTableHandle
 
 TEST_DATABASE_DIR = Path(__file__).parent.parent/ "test_databases"
 DUPLICATE_ATTR_NAME = "Error: duplicate attr name found in complex_nt object."
@@ -168,3 +168,49 @@ def extract_extended_data(
         primary_key += 1
 
     return all_extended_data_objs, all_extended_data_fks
+
+
+def compare_complex_extended_nt_obj_to_df(
+    base_table_handle: BaseTableHandle,
+    test_objs: List[NamedTuple],
+    table_data: Dict[str, pd.DataFrame]
+):
+    # extracting reused variables
+    base_table_config = base_table_handle.table_handle_data.table_config
+    base_table_name = base_table_config.table_name
+    base_table_primary_key = base_table_config.primary_key
+    allowed_named_tuples = base_table_config.allowed_namedtuples
+    allowed_data_types = base_table_config.allowed_dtypes
+    extended_table_handles_data = base_table_handle.extended_table_handles_data
+
+
+    # initing test objs with primary keys
+    _test_objs_w_pks = {}
+    for i in range(1, len(test_objs)+1):
+        _test_objs_w_pks[i] = test_objs[i-1]
+    # validating base table
+    compare_complex_nt_obj_to_df(
+        complex_nts=_test_objs_w_pks,
+        df=table_data[base_table_name],
+        allowed_data_types=[*allowed_data_types.keys()],
+        allowed_named_tuples=allowed_named_tuples,
+        index_name=base_table_primary_key
+    )
+
+    # extracting extended data objs
+    all_extended_data_objs, all_extended_data_fks = extract_extended_data(
+        complex_nts=test_objs,
+        allowed_data_types=[*allowed_data_types.keys()],
+        allowed_named_tuples=allowed_named_tuples,
+        base_table_primary_key=base_table_primary_key,
+    )
+
+    # validating extended tables
+    for data_name in all_extended_data_fks:
+        extended_table_name = f"{base_table_name}_{data_name}"
+        compare_complex_nt_obj_to_df(
+            complex_nts=all_extended_data_objs[data_name],
+            df=table_data[extended_table_name],
+            foreign_keys=all_extended_data_fks[data_name],
+            index_name=extended_table_handles_data[data_name].table_config.primary_key
+        )

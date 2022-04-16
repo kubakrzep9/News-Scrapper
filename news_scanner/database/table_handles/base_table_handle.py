@@ -357,9 +357,10 @@ class BaseTableHandle(BaseHandle):
             )
 
             if self.extended_table_handles_data:
-                for table_name, table_data_handle in self.extended_table_handles_data.items():
+                for extended_data_name, table_data_handle in self.extended_table_handles_data.items():
+                    print(f"removing from {table_name} {primary_key} {primary_key_name}")
                     self._remove(
-                        table_name=table_name,
+                        table_name=table_data_handle.table_config.table_name,
                         key_name=primary_key_name,
                         key_value=primary_key
                     )

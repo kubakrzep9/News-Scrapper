@@ -14,12 +14,10 @@ from news_scanner.database.table_handles.base_table_handle import (
 )
 from tests.database.test_helper.util import (
     tear_down,
-    compare_complex_nt_obj_to_df,
-    extract_extended_data
+    compare_complex_extended_nt_obj_to_df
 )
 from tests.database.conftest import TEST_DB_DIR
-from tests.database.test_helper.table_handle_validator import \
-    validate_table_handle
+from tests.database.test_helper.table_handle_validator import validate_extended_table_handle
 from news_scanner.database.util import (
     extract_attrs,
     get_name,
@@ -96,51 +94,65 @@ def test_table_exists_extended_data(base_test_handle: MyTestHandle):
     assert not base_test_handle.table_exists("not_a_table")
 
 
+def test_get_all(base_test_handle: BaseTableHandle):
+    base_table_config = base_test_handle.table_handle_data.table_config
+    base_table_name = base_table_config.table_name
+
+    expected_table_columns = {}
+
+    _, attr_pool_dtypes, extended_data = extract_attrs(
+        complex_nt=base_table_config.named_tuple_type(),
+        allowed_named_tuples=base_table_config.allowed_namedtuples,
+        allowed_data_types=base_table_config.allowed_dtypes
+    )
+    expected_table_columns[base_table_name] = [*attr_pool_dtypes.keys()]
+
+    for extended_data_name, extended_data_values in extended_data.items():
+        _, _attr_pool_dtypes, _ = extract_attrs(
+            complex_nt=extended_data_values[NAMED_TUPLE_DTYPE](),
+            allowed_named_tuples=base_table_config.allowed_namedtuples,
+            allowed_data_types=base_table_config.allowed_dtypes
+        )
+        extended_data_table_name = f"{base_table_name}_{extended_data_name}"
+        expected_table_columns[extended_data_table_name] = [*_attr_pool_dtypes.keys(), base_table_config.primary_key]
+
+    table_data = base_test_handle.get_all()
+    for table_name, table_df in table_data.items():
+        df_cols = [*table_df.columns]
+        assert df_cols == expected_table_columns[table_name]
+
+        assert table_df.empty
+
+
 def test_insert_and_get_all(base_test_handle: BaseTableHandle):
     """ Validating inserted data.
 
     Params:
 
     """
-    base_table_config = base_test_handle.table_handle_data.table_config
-    base_table_name = base_table_config.table_name
-    base_table_primary_key = base_table_config.primary_key
-    allowed_named_tuples = base_table_config.allowed_namedtuples
-    allowed_data_types = base_table_config.allowed_dtypes
-
     for test_obj, primary_key in zip(TEST_OBJS, PRIMARY_KEYS):
         base_test_handle.insert(
             named_tuple=test_obj,
             primary_key=primary_key,
         )
     table_data = base_test_handle.get_all()
-
-    # initing test objs
-    test_objs = {}
-    for i in range(1, len(TEST_OBJS)+1):
-        test_objs[i] = TEST_OBJS[i-1]
-    # validating base table
-    compare_complex_nt_obj_to_df(
-        complex_nts=test_objs,
-        df=table_data[base_table_name],
-        allowed_named_tuples=allowed_named_tuples,
-        index_name=base_table_primary_key
+    compare_complex_extended_nt_obj_to_df(
+        base_table_handle=base_test_handle,
+        test_objs=TEST_OBJS,
+        table_data=table_data
     )
 
-    # extracting extended data objs
-    all_extended_data_objs, all_extended_data_fks = extract_extended_data(
-        complex_nts=TEST_OBJS,
-        allowed_data_types=[*allowed_data_types.keys()],
-        allowed_named_tuples=allowed_named_tuples,
-        base_table_primary_key=base_table_primary_key,
-    )
 
-    # validating extended tables
-    for data_name in all_extended_data_fks:
-        extended_table_name = f"{base_table_name}_{data_name}"
-        compare_complex_nt_obj_to_df(
-            complex_nts=all_extended_data_objs[data_name],
-            df=table_data[extended_table_name],
-            foreign_keys=all_extended_data_fks[data_name],
-            index_name=base_test_handle.extended_table_handles_data[data_name].table_config.primary_key
+def test_remove(base_test_handle: BaseTableHandle):
+    for test_obj, primary_key in zip(TEST_OBJS, PRIMARY_KEYS):
+        base_test_handle.insert(
+            named_tuple=test_obj,
+            primary_key=primary_key,
         )
+    base_test_handle.remove()
+    table_data = base_test_handle.get_all()
+    compare_complex_extended_nt_obj_to_df(
+        base_table_handle=base_test_handle,
+        test_objs=TEST_OBJS[:-1],
+        table_data=table_data
+    )

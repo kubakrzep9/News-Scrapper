@@ -1,12 +1,13 @@
 """ """
 
-from news_scanner.database.table_handles.base_table_handle import BaseTableHandle
+from news_scanner.database.table_handles.base_table_handle import BaseTableHandle, TableConfig
 from typing import List, NamedTuple, Dict
-from tests.database.test_helper.util import compare_complex_nt_obj_to_df
+from tests.database.test_helper.util import (
+    compare_complex_nt_obj_to_df,
+    compare_complex_extended_nt_obj_to_df
+)
 
 
-# foreign keys
-# - validate by splitting df from results of get all
 def validate_table_handle(
     table_handle: BaseTableHandle,
     insert_list: List[NamedTuple],
@@ -52,3 +53,7 @@ def validate_table_handle(
         complex_nts=complex_nts,
         df=df,
     )
+
+
+def validate_extended_table_handle():
+    pass
