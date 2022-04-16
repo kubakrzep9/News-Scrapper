@@ -141,7 +141,6 @@ class BaseTableHandle(BaseHandle):
 
             # creating table_handle_data
             table_name = f"{table_config.table_name}_{extended_data_name}"
-            print(extended_data_name)
             table_handle_data = TableHandleData(
                 table_config=TableConfig(
                     named_tuple_type=extended_namedtuple_type,
@@ -230,9 +229,10 @@ class BaseTableHandle(BaseHandle):
         }
 
         if self.extended_table_handles_data:
-            for table_data_handle in self.extended_table_handles_data:
+            for data_name, table_data_handle in self.extended_table_handles_data.items():
+                table_name = table_data_handle.table_config.table_name
                 table_data[table_name] = self._get_all(
-                        table_name=table_data_handle.table_config.table_name,
+                        table_name=table_name,
                         primary_key=table_data_handle.table_config.primary_key
                     )
 
@@ -282,7 +282,6 @@ class BaseTableHandle(BaseHandle):
                     extended_primary_key = self.get_last_primary_key(
                         table_config=table_handle_data.table_config
                     ) + 1
-                    print("extended_primary_key:", extended_primary_key)
                     self._insert(
                         table_name=table_handle_data.table_config.table_name,
                         primary_key={table_handle_data.table_config.primary_key: extended_primary_key},

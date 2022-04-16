@@ -71,7 +71,8 @@ def compare_complex_nt_obj_to_df(
     df: pd.DataFrame,
     allowed_data_types: List = PYTHON_TO_SQL_DTYPES,
     allowed_named_tuples: List[type] = [],
-    index_name: str = None
+    index_name: str = None,
+    foreign_keys: Dict[str, List] = {}
 ) -> None:
     """ Returns true if complex object attrs match respective df values.
 
@@ -91,7 +92,12 @@ def compare_complex_nt_obj_to_df(
         all_attr_pool_values[key_id] = attr_pool_values
 
     generated_df = pd.DataFrame(all_attr_pool_values).T.astype(attr_pool_dtypes)
+
+    if foreign_keys:
+        for fk_name, fk_values in foreign_keys.items():
+            generated_df[fk_name] = fk_values
     generated_df = generated_df.reindex(sorted(generated_df.columns), axis=1)
+
     if index_name:
         generated_df.index = generated_df.index.rename(index_name)
     df = df.reindex(sorted(df.columns), axis=1)
