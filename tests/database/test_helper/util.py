@@ -1,6 +1,6 @@
 """ Test helper functions. """
 
-from typing import NamedTuple, Dict, List
+from typing import NamedTuple, Dict, List, Tuple
 from pathlib import Path
 import pandas as pd
 import numpy as np
@@ -133,3 +133,38 @@ def extract_sub_complexnt(
             sub_complexnt_data[sub_nt_name][key] = sub_complexnt
 
     return sub_complexnt_data
+
+
+def extract_extended_data(
+    complex_nts: List[NamedTuple],
+    allowed_data_types: List,
+    allowed_named_tuples: List,
+    base_table_primary_key: str
+) -> Tuple[Dict, Dict]:
+    # creating python objects to generate dataframe to validate
+    # the database against.
+    all_extended_data_fks = {}
+    all_extended_data_objs = {}
+    init_all_ext_data_objs = False
+    primary_key = 1
+    for complex_nt in complex_nts:
+        _, _, extended_data = extract_attrs(
+            complex_nt=complex_nt,
+            allowed_data_types=allowed_data_types,
+            allowed_named_tuples=allowed_named_tuples
+        )
+        # init struct to hold ext data
+        if not init_all_ext_data_objs:
+            for data_name, _ in extended_data.items():
+                all_extended_data_objs[data_name] = {}
+                all_extended_data_fks[data_name] = {base_table_primary_key: []}
+            init_all_ext_data_objs = True
+        # extract ext data
+        for data_name, meta_data in extended_data.items():
+            for extended_data_value in meta_data["value"]:
+                pk = len(all_extended_data_objs[data_name]) + 1
+                all_extended_data_objs[data_name][pk] = extended_data_value
+                all_extended_data_fks[data_name][base_table_primary_key].append(primary_key)
+        primary_key += 1
+
+    return all_extended_data_objs, all_extended_data_fks

@@ -367,6 +367,7 @@ class BaseTableHandle(BaseHandle):
         else:
             raise ValueError(TABLE_DOESNT_EXIST + table_name)
 
+    # Are cascading deletes enough for extended tables?
     def _remove(self, table_name, key_name, key_value):
         delete_query = f"DELETE FROM {table_name} " \
                        f"WHERE {key_name} = {key_value}"

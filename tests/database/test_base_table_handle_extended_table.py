@@ -12,7 +12,11 @@ from news_scanner.database.table_handles.base_table_handle import (
     ForeignkeyConfig,
     generate_name
 )
-from tests.database.test_helper.util import tear_down, compare_complex_nt_obj_to_df
+from tests.database.test_helper.util import (
+    tear_down,
+    compare_complex_nt_obj_to_df,
+    extract_extended_data
+)
 from tests.database.conftest import TEST_DB_DIR
 from tests.database.test_helper.table_handle_validator import \
     validate_table_handle
@@ -81,9 +85,6 @@ def base_test_handle() -> MyTestHandle:
 
 def test_table_exists_extended_data(base_test_handle: MyTestHandle):
     """ Ensures table existence in a database can be identified
-
-    TODO:
-        - Validate main and extended tables
     """
     assert base_test_handle.extended_table_handles_data  # assert extended_data is not empty
     assert base_test_handle.table_exists()
@@ -95,15 +96,17 @@ def test_table_exists_extended_data(base_test_handle: MyTestHandle):
     assert not base_test_handle.table_exists("not_a_table")
 
 
-def test_insert(base_test_handle: BaseTableHandle):
+def test_insert_and_get_all(base_test_handle: BaseTableHandle):
     """ Validating inserted data.
 
     Params:
 
     """
-    base_table_name = base_test_handle.table_handle_data.table_config.table_name
-    base_table_primary_key = base_test_handle.table_handle_data.table_config.primary_key
-    allowed_named_tuples = base_test_handle.table_handle_data.table_config.allowed_namedtuples
+    base_table_config = base_test_handle.table_handle_data.table_config
+    base_table_name = base_table_config.table_name
+    base_table_primary_key = base_table_config.primary_key
+    allowed_named_tuples = base_table_config.allowed_namedtuples
+    allowed_data_types = base_table_config.allowed_dtypes
 
     for test_obj, primary_key in zip(TEST_OBJS, PRIMARY_KEYS):
         base_test_handle.insert(
@@ -112,10 +115,11 @@ def test_insert(base_test_handle: BaseTableHandle):
         )
     table_data = base_test_handle.get_all()
 
-    # validating base table
+    # initing test objs
     test_objs = {}
     for i in range(1, len(TEST_OBJS)+1):
         test_objs[i] = TEST_OBJS[i-1]
+    # validating base table
     compare_complex_nt_obj_to_df(
         complex_nts=test_objs,
         df=table_data[base_table_name],
@@ -123,38 +127,15 @@ def test_insert(base_test_handle: BaseTableHandle):
         index_name=base_table_primary_key
     )
 
+    # extracting extended data objs
+    all_extended_data_objs, all_extended_data_fks = extract_extended_data(
+        complex_nts=TEST_OBJS,
+        allowed_data_types=[*allowed_data_types.keys()],
+        allowed_named_tuples=allowed_named_tuples,
+        base_table_primary_key=base_table_primary_key,
+    )
+
     # validating extended tables
-
-    # creating python objects to generate dataframe to validate
-    # the database against.
-    all_extended_data_fks = {}
-    all_extended_data_objs = {}
-    init_all_ext_data_objs = False
-    primary_key = 1
-    for complex_nt in TEST_OBJS:
-        _, _, extended_data = extract_attrs(
-            complex_nt=complex_nt,
-            allowed_data_types=[*base_test_handle.table_handle_data.table_config.allowed_dtypes.keys()],
-            allowed_named_tuples=allowed_named_tuples
-        )
-        # init struct to hold ext data
-        if not init_all_ext_data_objs:
-            for data_name, _ in extended_data.items():
-                all_extended_data_objs[data_name] = {}
-                all_extended_data_fks[data_name] = {base_table_primary_key: []}
-            init_all_ext_data_objs = True
-        # extract ext data
-        for data_name, meta_data in extended_data.items():
-            # print(data_name)
-            # print(meta_data["value"])
-            # print(base_test_handle.extended_table_handles_data[data_name])
-            # all_extended_data_objs
-            for extended_data_value in meta_data["value"]:
-                pk = len(all_extended_data_objs[data_name]) + 1
-                all_extended_data_objs[data_name][pk] = extended_data_value
-                all_extended_data_fks[data_name][base_table_primary_key].append(primary_key)
-        primary_key += 1
-
     for data_name in all_extended_data_fks:
         extended_table_name = f"{base_table_name}_{data_name}"
         compare_complex_nt_obj_to_df(

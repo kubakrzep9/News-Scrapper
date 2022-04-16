@@ -102,10 +102,6 @@ def _extract_attrs(
                 # Validate
                 # extended_data must be a named tuple
                 if extended_data_type not in allowed_named_tuples:
-                    print("extended data type")
-                    print(extended_data_type)
-                    print("allowed named tuples")
-                    print(allowed_named_tuples)
                     raise ValueError(f"{INVALID_EXTENDED_DTYPE} ('{attr_name}' '{extended_data_type}')")
                 extended_data[attr_name] = {
                     NAMED_TUPLE_DTYPE: extended_data_type,
@@ -115,7 +111,8 @@ def _extract_attrs(
                 attr_pool_values[attr_name] = attr_value
                 attr_pool_dtypes[attr_name] = attr_type
         else:
-            raise ValueError(f"{INVALID_DATA_TYPE} ('{attr_type}")
+            print("allowed_data_types:", allowed_data_types)
+            raise ValueError(f"{INVALID_DATA_TYPE} ('{attr_name}') ('{attr_type})")
     return attr_pool_values, attr_pool_dtypes, extended_data
 
 
