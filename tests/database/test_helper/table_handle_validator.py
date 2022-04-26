@@ -53,7 +53,3 @@ def validate_table_handle(
         complex_nts=complex_nts,
         df=df,
     )
-
-
-def validate_extended_table_handle():
-    pass

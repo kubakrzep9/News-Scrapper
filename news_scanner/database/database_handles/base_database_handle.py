@@ -6,7 +6,8 @@ from news_scanner.database.util import (
     validate_complex_nt_schema,
     validate_complex_nt_obj,
     get_namedtuple_name,
-    extract_attrs
+    extract_attrs,
+    get_table_name
 )
 from news_scanner.database.constants import (
     PYTHON_TO_SQL_DTYPES,
@@ -79,7 +80,7 @@ class BaseDatabaseHandle(BaseHandle):
         # turning the complex_nt into a table
         self.table_handles = {}
         for namedtuple in self.def_db_obj_instance:
-            nt_name = get_namedtuple_name(namedtuple)
+            nt_name = get_table_name(type(namedtuple).__name__)
             self.table_handles[nt_name] = BaseTableHandle(
                 table_config=TableConfig(
                     named_tuple_type=type(namedtuple),
@@ -106,7 +107,7 @@ class BaseDatabaseHandle(BaseHandle):
 
             try:
                 for namedtuple in complex_nt:
-                    nt_name = get_namedtuple_name(namedtuple)
+                    nt_name = get_table_name(type(namedtuple).__name__)
                     self.table_handles[nt_name].insert(
                         named_tuple=namedtuple,
                         primary_key=primary_key

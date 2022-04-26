@@ -34,7 +34,7 @@ def get_datatype(value: Any, allowed_dtypes: Dict, allowed_namedtuples: List = [
     raise ValueError(INVALID_DATA_TYPE)
 
 
-def get_name(nt_name: str) -> str:
+def get_table_name(nt_name: str) -> str:
     for c in nt_name:
         if not c.isnumeric() and not c.isalpha():
             raise ValueError(ERROR_INVALID_NT_NAME)
@@ -191,3 +191,7 @@ def get_namedtuple_name(namedtuple):
     if name_end_index == -1:
         raise ValueError(NAMEDTUPLE_NAME_NOT_FOUND)
     return str(namedtuple)[:name_end_index]
+
+
+def get_table_name2(namedtuple) -> str:
+    return get_table_name(get_namedtuple_name(namedtuple))

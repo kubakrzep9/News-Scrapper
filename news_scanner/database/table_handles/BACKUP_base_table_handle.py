@@ -3,7 +3,7 @@
 import pandas as pd
 from pathlib import Path
 from typing import List, NamedTuple, Dict, Tuple, Union
-from news_scanner.database.util import extract_attrs, get_name
+from news_scanner.database.util import extract_attrs, get_table_name
 from news_scanner.database.constants import (
     PYTHON_TO_SQL_DTYPES,
     DEF_PRIMARY_KEY,
@@ -227,7 +227,7 @@ def generate_name(
         raise ValueError(MISSING_NT_TYPE)
 
     db_file_type = ".sqlite"
-    name = get_name(table_data.named_tuple_type.__name__)
+    name = get_table_name(table_data.named_tuple_type.__name__)
     if not db_file_name:
         db_file_name = name+db_file_type
     if not table_data.table_name:

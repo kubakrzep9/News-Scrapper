@@ -5,13 +5,14 @@ from pathlib import Path
 from typing import List, NamedTuple, Dict, Tuple, Union, Any
 from news_scanner.database.util import (
     extract_attrs,
-    get_name,
+    get_table_name,
     NAMED_TUPLE_DTYPE,
     EXTENDED_DATA_VALUE
 )
 from news_scanner.database.constants import (
     PYTHON_TO_SQL_DTYPES,
     DEF_PRIMARY_KEY,
+    EXTENDED_DATA_PRIMARY_KEY
 )
 from news_scanner.database.base_handle import BaseHandle, DB_DIR
 
@@ -118,8 +119,6 @@ class BaseTableHandle(BaseHandle):
         table_config: TableConfig,
         extended_data: Dict
     ):
-        extended_data_primary_key = "ext_id"
-
         extended_table_handles_data = {}
         for extended_data_name, extended_data_metadata in extended_data.items():
             extended_namedtuple_type = extended_data_metadata[NAMED_TUPLE_DTYPE]
@@ -136,7 +135,7 @@ class BaseTableHandle(BaseHandle):
 
             # creating table column types
             table_column_dtypes = attr_dtypes.copy()
-            for key in [table_config.primary_key, extended_data_primary_key]:
+            for key in [table_config.primary_key, EXTENDED_DATA_PRIMARY_KEY]:
                 table_column_dtypes[key] = int
 
             # creating table_handle_data
@@ -145,7 +144,7 @@ class BaseTableHandle(BaseHandle):
                 table_config=TableConfig(
                     named_tuple_type=extended_namedtuple_type,
                     table_name=table_name,
-                    primary_key=extended_data_primary_key,
+                    primary_key=EXTENDED_DATA_PRIMARY_KEY,
                     allowed_dtypes=table_config.allowed_dtypes,
                     allowed_namedtuples=table_config.allowed_namedtuples
                 ),
@@ -368,7 +367,6 @@ class BaseTableHandle(BaseHandle):
         else:
             raise ValueError(TABLE_DOESNT_EXIST + table_name)
 
-    # Are cascading deletes enough for extended tables?
     def _remove(self, table_name, key_name, key_value):
         delete_query = f"DELETE FROM {table_name} " \
                        f"WHERE {key_name} = {key_value}"
@@ -384,7 +382,7 @@ def generate_name(
         raise ValueError(MISSING_NT_TYPE)
 
     db_file_type = ".sqlite"
-    name = get_name(table_config.named_tuple_type.__name__)
+    name = get_table_name(table_config.named_tuple_type.__name__)
     if not db_file_name:
         db_file_name = name+db_file_type
     # rebuilding table_config with generated table name.

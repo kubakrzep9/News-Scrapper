@@ -4,7 +4,7 @@ from typing import NamedTuple, Dict, List, Tuple
 from pathlib import Path
 import pandas as pd
 import numpy as np
-from news_scanner.database.util import extract_attrs, get_namedtuple_name
+from news_scanner.database.util import extract_attrs, get_namedtuple_name, get_table_name
 from news_scanner.database.constants import PYTHON_TO_SQL_DTYPES
 from tests.database.conftest import TEST_DIR
 from news_scanner.database.table_handles.base_table_handle import BaseTableHandle
@@ -122,14 +122,14 @@ def extract_sub_complexnt(
     sub_complexnt_data = {}
     complex_nt = complex_nts[0]
     for sub_complexnt in complex_nt:
-        sub_nt_name = get_namedtuple_name(sub_complexnt)
+        sub_nt_name = get_table_name(get_namedtuple_name(sub_complexnt))
         # dict for each subcomplexnt (table)
         sub_complexnt_data[sub_nt_name] = {}
 
     # extracting sub_complexnt data
     for complex_nt, key in zip(complex_nts, index_list):
         for sub_complexnt in complex_nt:
-            sub_nt_name = get_namedtuple_name(sub_complexnt)
+            sub_nt_name = get_table_name(get_namedtuple_name(sub_complexnt))
             sub_complexnt_data[sub_nt_name][key] = sub_complexnt
 
     return sub_complexnt_data

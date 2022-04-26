@@ -1,28 +1,20 @@
 """ Validates 'BaseHandle' class. """
 
-from typing import NamedTuple, List, Dict
+from typing import NamedTuple, List
 
-import pandas as pd
 import pytest
-from pathlib import Path
 from news_scanner.database.table_handles.base_table_handle import (
     BaseTableHandle,
-    DEF_PRIMARY_KEY,
     TableConfig,
-    ForeignkeyConfig,
-    generate_name
 )
 from tests.database.test_helper.util import (
     tear_down,
     compare_complex_extended_nt_obj_to_df
 )
 from tests.database.conftest import TEST_DB_DIR
-from tests.database.test_helper.table_handle_validator import validate_extended_table_handle
 from news_scanner.database.util import (
     extract_attrs,
-    get_name,
     NAMED_TUPLE_DTYPE,
-    EXTENDED_DATA_VALUE
 )
 
 TEST_DATABASE_PATH = TEST_DB_DIR / "base_database.sqlite"
