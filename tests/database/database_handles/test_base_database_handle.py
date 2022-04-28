@@ -117,6 +117,7 @@ def test_get_next_primary_key(complexnt_handle):
     "num_insert", [0, 1, 3]
 )
 def test_insert_and_get_all(complexnt_handle, complexnt_ext_testobjs, num_insert):
+    print()
     complex_nts = {}
     i = 1
     for test_obj in complexnt_ext_testobjs[:num_insert]:
@@ -129,26 +130,30 @@ def test_insert_and_get_all(complexnt_handle, complexnt_ext_testobjs, num_insert
     # ensure db tables are empty
     if num_insert == 0:
         for base_table_name, all_table_data in db_table_data.items():
-            for table_name, table_data in all_table_data.items():
-                assert table_data.empty
+            for table_name, all_table_data in all_table_data.items():
+                assert all_table_data.empty
 
     # ensure db tables contain expected values
     else:
-        sub_complexnt_data = extract_sub_complexnt(complex_nts=complexnt_ext_testobjs[:num_insert])
-        for base_table_name, table_data in db_table_data.items():
-            if len(table_data.keys()) > 1:
-                complexnt_ext_objs = [*sub_complexnt_data[base_table_name].values()]
+        all_sub_complexnt_data = extract_sub_complexnt(
+            complex_nts=complexnt_ext_testobjs[:num_insert]
+        )
+        for base_table_name, all_table_data in db_table_data.items():
+            if len(all_table_data.keys()) > 1:
+                complexnt_ext_objs = [*all_sub_complexnt_data[base_table_name].values()]
+                index = [*all_sub_complexnt_data[base_table_name].keys()]
                 compare_complex_extended_nt_obj_to_df(
                     base_table_handle=complexnt_handle.table_handles[base_table_name],
                     test_objs=complexnt_ext_objs,
-                    table_data=table_data
+                    table_data=all_table_data,
+                    index=index,
                 )
             else:
                 compare_complex_nt_obj_to_df(
-                    complex_nts=sub_complexnt_data[base_table_name],
-                    df=table_data[base_table_name],
+                    complex_nts=all_sub_complexnt_data[base_table_name],
+                    df=all_table_data[base_table_name],
                     allowed_named_tuples=_ALLOWED_NAMED_TUPLES,
-                    allowed_data_types=ALLOWED_DATA_TYPES
+                    allowed_data_types=ALLOWED_DATA_TYPES,
                 )
 
 

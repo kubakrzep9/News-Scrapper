@@ -170,11 +170,15 @@ def extract_extended_data(
     return all_extended_data_objs, all_extended_data_fks
 
 
+# Need extended table keys
 def compare_complex_extended_nt_obj_to_df(
     base_table_handle: BaseTableHandle,
     test_objs: List[NamedTuple],
-    table_data: Dict[str, pd.DataFrame]
+    table_data: Dict[str, pd.DataFrame],
+    index: List[int],
 ):
+    assert len(test_objs) == len(index)
+
     # extracting reused variables
     base_table_config = base_table_handle.table_handle_data.table_config
     base_table_name = base_table_config.table_name
@@ -183,11 +187,10 @@ def compare_complex_extended_nt_obj_to_df(
     allowed_data_types = base_table_config.allowed_dtypes
     extended_table_handles_data = base_table_handle.extended_table_handles_data
 
-
     # initing test objs with primary keys
     _test_objs_w_pks = {}
-    for i in range(1, len(test_objs)+1):
-        _test_objs_w_pks[i] = test_objs[i-1]
+    for i, test_obj in zip(index, test_objs):
+        _test_objs_w_pks[i] = test_obj
     # validating base table
     compare_complex_nt_obj_to_df(
         complex_nts=_test_objs_w_pks,

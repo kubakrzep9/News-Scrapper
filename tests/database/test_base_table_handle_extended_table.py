@@ -106,7 +106,9 @@ def test_get_all(base_test_handle: BaseTableHandle):
             allowed_data_types=base_table_config.allowed_dtypes
         )
         extended_data_table_name = f"{base_table_name}_{extended_data_name}"
-        expected_table_columns[extended_data_table_name] = [*_attr_pool_dtypes.keys(), base_table_config.primary_key]
+        expected_table_columns[extended_data_table_name] = [
+            *_attr_pool_dtypes.keys(), base_table_config.primary_key
+        ]
 
     table_data = base_test_handle.get_all()
     for table_name, table_df in table_data.items():
@@ -122,7 +124,8 @@ def test_insert_and_get_all(base_test_handle: BaseTableHandle):
     Params:
 
     """
-    for test_obj, primary_key in zip(TEST_OBJS, PRIMARY_KEYS):
+    index = PRIMARY_KEYS
+    for test_obj, primary_key in zip(TEST_OBJS, index):
         base_test_handle.insert(
             named_tuple=test_obj,
             primary_key=primary_key,
@@ -131,12 +134,14 @@ def test_insert_and_get_all(base_test_handle: BaseTableHandle):
     compare_complex_extended_nt_obj_to_df(
         base_table_handle=base_test_handle,
         test_objs=TEST_OBJS,
-        table_data=table_data
+        table_data=table_data,
+        index=index
     )
 
 
 def test_remove(base_test_handle: BaseTableHandle):
-    for test_obj, primary_key in zip(TEST_OBJS, PRIMARY_KEYS):
+    index = PRIMARY_KEYS
+    for test_obj, primary_key in zip(TEST_OBJS, index):
         base_test_handle.insert(
             named_tuple=test_obj,
             primary_key=primary_key,
@@ -146,5 +151,6 @@ def test_remove(base_test_handle: BaseTableHandle):
     compare_complex_extended_nt_obj_to_df(
         base_table_handle=base_test_handle,
         test_objs=TEST_OBJS[:-1],
-        table_data=table_data
+        table_data=table_data,
+        index=index[:-1]
     )
