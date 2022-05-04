@@ -30,7 +30,6 @@ def get_datatype(value: Any, allowed_dtypes: Dict, allowed_namedtuples: List = [
     for namedtuple_type in allowed_namedtuples:
         if isinstance(value, namedtuple_type):
             return NAMEDTUPLE
-    print(value, type(value))
     raise ValueError(INVALID_DATA_TYPE)
 
 

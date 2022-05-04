@@ -44,6 +44,16 @@ class ComplexNTHandle(BaseDatabaseHandle):
         )
 
 
+EXPECTED_EXTENDED_TABLE_NAME = "named_tuple4_extended_data"
+EXTENDED_TABLE_INDEX = {
+    EXPECTED_EXTENDED_TABLE_NAME: {
+        1: [1],
+        2: [2],
+        3: [3],
+    }
+}
+
+
 @pytest.fixture
 def complexnt_ext_testobjs() -> List[ComplexNT_ExtData]:
     num_test_objs = 3
@@ -117,7 +127,12 @@ def test_get_next_primary_key(complexnt_handle):
     "num_insert", [0, 1, 3]
 )
 def test_insert_and_get_all(complexnt_handle, complexnt_ext_testobjs, num_insert):
-    print()
+    extended_table_indexes = {EXPECTED_EXTENDED_TABLE_NAME: {}}
+    for pk in range(1, num_insert+1):
+        extended_table_indexes[EXPECTED_EXTENDED_TABLE_NAME][pk] = \
+            EXTENDED_TABLE_INDEX[EXPECTED_EXTENDED_TABLE_NAME][pk]
+
+
     complex_nts = {}
     i = 1
     for test_obj in complexnt_ext_testobjs[:num_insert]:
@@ -147,6 +162,7 @@ def test_insert_and_get_all(complexnt_handle, complexnt_ext_testobjs, num_insert
                     test_objs=complexnt_ext_objs,
                     table_data=all_table_data,
                     index=index,
+                    extended_table_indexes=extended_table_indexes
                 )
             else:
                 compare_complex_nt_obj_to_df(

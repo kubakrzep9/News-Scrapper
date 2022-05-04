@@ -56,9 +56,6 @@ def insert_data(
     return data
 
 
-########
-# Add expected extended table indexs to be added to generated tables.
-########
 def test_newsreport_database_handle():
     tear_down()
     print()

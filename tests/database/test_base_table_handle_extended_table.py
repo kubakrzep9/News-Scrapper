@@ -53,6 +53,14 @@ TEST_OBJS_DICT = {
 PRIMARY_KEYS = [*TEST_OBJS_DICT.keys()]
 TEST_OBJS = [*TEST_OBJS_DICT.values()]
 
+EXTENDED_TABLE_INDEX = {
+    "my_test_obj_extended_data": {
+        1: [1, 2, 3],
+        2: [4, 5, 6],
+        3: [7, 8, 9],
+    }
+}
+
 
 class MyTestHandle(BaseTableHandle):
     def __init__(self):
@@ -135,7 +143,8 @@ def test_insert_and_get_all(base_test_handle: BaseTableHandle):
         base_table_handle=base_test_handle,
         test_objs=TEST_OBJS,
         table_data=table_data,
-        index=index
+        index=index,
+        extended_table_indexes=EXTENDED_TABLE_INDEX
     )
 
 
@@ -147,10 +156,16 @@ def test_remove(base_test_handle: BaseTableHandle):
             primary_key=primary_key,
         )
     base_test_handle.remove()
+    ext_indexes = EXTENDED_TABLE_INDEX.copy()
+
+    for ext_table_name, pks in ext_indexes.items():
+        del pks[index[-1]]
+
     table_data = base_test_handle.get_all()
     compare_complex_extended_nt_obj_to_df(
         base_table_handle=base_test_handle,
         test_objs=TEST_OBJS[:-1],
         table_data=table_data,
-        index=index[:-1]
+        index=index[:-1],
+        extended_table_indexes=ext_indexes
     )

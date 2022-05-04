@@ -93,6 +93,7 @@ def compare_complex_nt_obj_to_df(
 
     generated_df = pd.DataFrame(all_attr_pool_values).T.astype(attr_pool_dtypes)
 
+    # print("foreign_keys:", foreign_keys)
     if foreign_keys:
         for fk_name, fk_values in foreign_keys.items():
             generated_df[fk_name] = fk_values
@@ -105,6 +106,7 @@ def compare_complex_nt_obj_to_df(
     # comparing df generated from complex_nts to df passed in
     assert len(generated_df.columns) == len(df.columns)
     assert np.all(generated_df.columns.sort_values() == df.columns.sort_values())
+    # print("\ngenerated\n", generated_df, "\ndatabase\n", df)
     assert generated_df.equals(df)
 
 
@@ -136,7 +138,8 @@ def extract_sub_complexnt(
 
 
 def extract_extended_data(
-    complex_nts: List[NamedTuple],
+    complex_nts: Dict[int, NamedTuple],
+    extended_table_indexes: Dict[str, Dict[int, List[int]]],
     allowed_data_types: List,
     allowed_named_tuples: List,
     base_table_primary_key: str
@@ -146,8 +149,11 @@ def extract_extended_data(
     all_extended_data_fks = {}
     all_extended_data_objs = {}
     init_all_ext_data_objs = False
-    primary_key = 1
-    for complex_nt in complex_nts:
+
+    arb_complex_nt = [*complex_nts.values()][0]
+    base_table_name = get_table_name(type(arb_complex_nt).__name__)
+
+    for primary_key, complex_nt in complex_nts.items():
         _, _, extended_data = extract_attrs(
             complex_nt=complex_nt,
             allowed_data_types=allowed_data_types,
@@ -160,22 +166,27 @@ def extract_extended_data(
                 all_extended_data_fks[data_name] = {base_table_primary_key: []}
             init_all_ext_data_objs = True
         # extract ext data
-        for data_name, meta_data in extended_data.items():
-            for extended_data_value in meta_data["value"]:
-                pk = len(all_extended_data_objs[data_name]) + 1
-                all_extended_data_objs[data_name][pk] = extended_data_value
-                all_extended_data_fks[data_name][base_table_primary_key].append(primary_key)
-        primary_key += 1
+        for ext_data_name, meta_data in extended_data.items():
+            ext_table_name = f"{base_table_name}_{ext_data_name}"
+            for extended_data_value, ext_pk in zip(
+                meta_data["value"],
+                extended_table_indexes[ext_table_name][primary_key]
+            ):
+                all_extended_data_objs[ext_data_name][ext_pk] = extended_data_value
+                all_extended_data_fks[ext_data_name][base_table_primary_key].append(primary_key)
 
     return all_extended_data_objs, all_extended_data_fks
 
 
-# Need extended table keys
+#######################################
+# Need extended table keys still fd
+######################################
 def compare_complex_extended_nt_obj_to_df(
     base_table_handle: BaseTableHandle,
     test_objs: List[NamedTuple],
     table_data: Dict[str, pd.DataFrame],
     index: List[int],
+    extended_table_indexes: Dict[str, Dict[int, List[int]]] = {}
 ):
     assert len(test_objs) == len(index)
 
@@ -202,18 +213,43 @@ def compare_complex_extended_nt_obj_to_df(
 
     # extracting extended data objs
     all_extended_data_objs, all_extended_data_fks = extract_extended_data(
-        complex_nts=test_objs,
+        complex_nts=_test_objs_w_pks,
+        extended_table_indexes=extended_table_indexes,
         allowed_data_types=[*allowed_data_types.keys()],
         allowed_named_tuples=allowed_named_tuples,
         base_table_primary_key=base_table_primary_key,
     )
 
-    # validating extended tables
-    for data_name in all_extended_data_fks:
-        extended_table_name = f"{base_table_name}_{data_name}"
-        compare_complex_nt_obj_to_df(
-            complex_nts=all_extended_data_objs[data_name],
-            df=table_data[extended_table_name],
-            foreign_keys=all_extended_data_fks[data_name],
-            index_name=extended_table_handles_data[data_name].table_config.primary_key
-        )
+    if extended_table_indexes:
+        for ext_data_name, ext_data_objs_w_pks in all_extended_data_objs.items():
+            ext_table_name = f"{base_table_name}_{ext_data_name}"
+            compare_complex_nt_obj_to_df(
+                    complex_nts=ext_data_objs_w_pks,
+                    df=table_data[ext_table_name],
+                    foreign_keys=all_extended_data_fks[ext_data_name],
+                    index_name=extended_table_handles_data[ext_data_name].table_config.primary_key
+                )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
