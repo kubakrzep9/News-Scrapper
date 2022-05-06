@@ -58,7 +58,6 @@ def insert_data(
 
 def test_newsreport_database_handle():
     tear_down()
-    print()
     validate_database_handle(
         database_handle=NewsReportDatabaseHandle(
             db_dir=TEST_DB_DIR

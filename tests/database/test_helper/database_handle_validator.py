@@ -14,6 +14,9 @@ from news_scanner.database.constants import (
 )
 from random import randint, sample
 
+_COPY_PK = "copy_pk"
+_INSERT_PK = "insert_pk"
+
 
 def _validate_database_init(
     database_handle: BaseDatabaseHandle,
@@ -80,24 +83,31 @@ def _database_random_remove(
 
 def _database_random_insert(
     database_handle: BaseDatabaseHandle,
+    original_insert_data: List[NamedTuple],
     current_data: List[NamedTuple],
     current_index: List[int],
-) -> Tuple[List[int], List[NamedTuple]]:
+) -> Tuple[List[int], List[NamedTuple], List[Dict]]:
+    insert_index_map = []
     num_rows_to_insert = randint(1, 2)
     insert_rows_index = set(sample(range(1, len(current_data)), num_rows_to_insert))
 
     _current_index = current_index.copy()
     _current_data = current_data.copy()
-    insert_data = []
+    to_insert_data = []
 
-    for i in insert_rows_index:
-        insert_data.append(current_data[i - 1])
-        _current_data.append(current_data[i - 1])
-        _current_index.append(max(_current_index)+1)
+    for copy_pk in insert_rows_index:
+        insert_pk = max(_current_index)+1
+        to_insert_data.append(original_insert_data[copy_pk - 1])
+        _current_data.append(original_insert_data[copy_pk - 1])
+        _current_index.append(insert_pk)
+        insert_index_map.append({
+            _COPY_PK: copy_pk,
+            _INSERT_PK: insert_pk
+        })
+        print(f"Inserting pk {copy_pk} data at pk {insert_pk}")
+    database_handle.insert(insert_data=to_insert_data)
 
-    database_handle.insert(insert_data=insert_data)
-
-    return [*_current_index], _current_data
+    return [*_current_index], _current_data, insert_index_map
 
 
 def _init_extended_table_indexes(
@@ -186,6 +196,57 @@ def _validate_database_state(
     assert database_handle.get_next_primary_key() == expected_next_primary_key
 
 
+def _get_next_ext_id(extended_table_indexes):
+    next_ext_ids = {}
+
+    for ext_table_name, pk_dict in extended_table_indexes.items():
+        base_pks = [*pk_dict.keys()]
+        if not base_pks:
+            next_ext_id = 1
+        else:
+            last_base_pk = max(base_pks)
+            ext_indexes = pk_dict[last_base_pk]
+            next_ext_id = max(ext_indexes) + 1
+
+        next_ext_ids[ext_table_name] = next_ext_id
+
+    return next_ext_ids
+
+
+def _get_current_extended_indexes(
+    current_index,
+    insert_index_map,
+    extended_table_indexes
+):
+    next_ext_ids = _get_next_ext_id(extended_table_indexes)
+    current_extended_table_indexes = extended_table_indexes.copy()
+
+    # adding new ext_ids
+    for index_map in insert_index_map:
+        copy_i = index_map[_COPY_PK]
+        insert_i = index_map[_INSERT_PK]
+        for ext_table_name, next_ext_id in next_ext_ids.items():
+            num_ext_ids = len(extended_table_indexes[ext_table_name][copy_i])
+            current_extended_table_indexes[ext_table_name][insert_i] = []
+            for _ in range(num_ext_ids):
+                current_extended_table_indexes[ext_table_name][insert_i].append(next_ext_id)
+                next_ext_id += 1
+            next_ext_ids[ext_table_name] = next_ext_id
+
+    # removing ext_ids not in current_index
+    _to_remove = {}
+    for ext_table_name, pk_index in current_extended_table_indexes.items():
+        _to_remove[ext_table_name] = []
+        for pk in pk_index:
+            if pk not in current_index:
+                _to_remove[ext_table_name].append(pk)
+    for ext_table_name in current_extended_table_indexes.keys():
+        for pk in _to_remove[ext_table_name]:
+            del current_extended_table_indexes[ext_table_name][pk]
+
+    return current_extended_table_indexes
+
+
 def validate_database_handle(
     database_handle: BaseDatabaseHandle,
     insert_data: List,
@@ -231,22 +292,25 @@ def validate_database_handle(
         extended_table_indexes=extended_table_indexes
     )
 
-    ############################################
-    # Need to handle when new pk how to correlate expected table data
-    ###############################
+    # insert random rows
+    current_index, current_data, insert_index_map = _database_random_insert(
+        database_handle=database_handle,
+        original_insert_data=insert_data,
+        current_data=current_data,
+        current_index=current_index
+    )
 
-    # # insert random rows
-    # current_index, current_data = _database_random_insert(
-    #     database_handle=database_handle,
-    #     current_data=current_data,
-    #     current_index=current_index
-    # )
-    # _validate_database_state(
-    #     database_handle=database_handle,
-    #     expected_complex_nts=current_data,
-    #     expected_index=current_index,
-    #     allowed_namedtuples=allowed_namedtuples,
-    #     allowed_dtypes=allowed_dtypes,
-    #     extended_table_indexes=extended_table_indexes
-    # )
+    current_extended_indexes = _get_current_extended_indexes(
+        current_index=current_index,
+        insert_index_map=insert_index_map,
+        extended_table_indexes=extended_table_indexes
+    )
 
+    _validate_database_state(
+        database_handle=database_handle,
+        expected_complex_nts=current_data,
+        expected_index=current_index,
+        allowed_namedtuples=allowed_namedtuples,
+        allowed_dtypes=allowed_dtypes,
+        extended_table_indexes=current_extended_indexes  # needs to take removed rows into account
+    )
