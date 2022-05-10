@@ -7,6 +7,6 @@ setup(
     packages=["news_scanner"],
     install_requires=[
         "tda-api", "pytest", "pandas", "bs4", "requests", "selenium",
-        "httpx", "twython", "numpy", "python-dotenv"
+        "httpx", "twython", "numpy", "python-dotenv", "nltk"
     ]
 )
