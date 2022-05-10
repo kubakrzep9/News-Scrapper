@@ -1,6 +1,14 @@
 
 from typing import List
-from news_scanner.result_object import NewsReport, StockData, ScrappedNewsResult, NameData, ALLOWED_NAMED_TUPLES
+from news_scanner.result_object import (
+    NewsReport,
+    StockData,
+    ScrappedNewsResult,
+    NameData,
+    ProcessedNewsResult,
+    ALLOWED_NAMED_TUPLES,
+)
+from news_scanner.news_scrapper.article_processor import WordCount
 from news_scanner.database.database_handles.newsreport_database_handle import NewsReportDatabaseHandle
 from tests.database.test_helper.database_handle_validator import validate_database_handle
 from tests.database.test_helper.util import tear_down
@@ -19,6 +27,18 @@ def insert_data(
                     link=f"link {i}",
                     publish_date=f"publish date {i}",
                     content=f"content {i}"
+                ),
+                processedNewsResults=ProcessedNewsResult(
+                    article_keywords=[
+                        WordCount(word=f"word {i}", count=i),
+                        WordCount(word=f"word {i+1}", count=i+1)
+                    ],
+                    headline_keywords=[
+                        WordCount(word=f"word {i}", count=i),
+                        WordCount(word=f"word {i + 1}", count=i + 1)
+                    ],
+                    sentiment=0.01/i,
+                    article_type=f"article type {i}"
                 ),
                 stockData=StockData(
                     market_cap=0.001+i,

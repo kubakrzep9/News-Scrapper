@@ -18,7 +18,10 @@ def power_switch_handle() -> PowerSwitchHandle:
 
 def test_init(power_switch_handle: PowerSwitchHandle):
     assert power_switch_handle.table_exists()
-    df = power_switch_handle.get_all()
+    table_data = power_switch_handle.get_all()
+    assert len(table_data) == 1
+
+    df = table_data[power_switch_handle.table_handle_data.table_config.table_name]
     assert len(df) == 1
     assert df.iloc[power_switch_handle._power_index][POWER] == ON
     tear_down()
@@ -27,7 +30,8 @@ def test_init(power_switch_handle: PowerSwitchHandle):
 def test_init_table(power_switch_handle: PowerSwitchHandle):
     """Ensuring _init_table does nothing if already called before. """
     power_switch_handle._init_table()
-    df = power_switch_handle.get_all()
+    table_data = power_switch_handle.get_all()
+    df = table_data[power_switch_handle.table_handle_data.table_config.table_name]
     assert len(df) == 1
     assert df.iloc[power_switch_handle._power_index][POWER] == ON
     tear_down()
@@ -38,7 +42,9 @@ def test_set_power(power_switch_handle: PowerSwitchHandle):
     expected_power_values = [OFF, ON]
     for mode, expected in zip(power_modes,expected_power_values):
         power_switch_handle.set_power(mode)
-        df = power_switch_handle.get_all()
+        table_data = power_switch_handle.get_all()
+        df = table_data[power_switch_handle.table_handle_data.table_config.table_name]
+
         assert len(df) == 1
         assert df.iloc[power_switch_handle._power_index][POWER] == expected
     tear_down()

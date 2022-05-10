@@ -1,7 +1,7 @@
 """ Contains final result object used by 'NewsScanner' class. """
 
 from news_scanner.news_scrapper.target_news_scrapper import ScrappedNewsResult
-from news_scanner.news_scrapper.article_processor import ProcessedNewsResult
+from news_scanner.news_scrapper.article_processor import ProcessedNewsResult, WordCount
 from news_scanner.td_api.td_api_handle import StockData
 from typing import NamedTuple
 
@@ -11,7 +11,9 @@ class NameData(NamedTuple):
     exchange: str = "exchange"
 
 
-ALLOWED_NAMED_TUPLES = [ScrappedNewsResult, StockData, NameData]
+ALLOWED_NAMED_TUPLES = [
+    ScrappedNewsResult, StockData, NameData, ProcessedNewsResult, WordCount
+]
 
 
 class NewsReport(NamedTuple):
@@ -25,6 +27,6 @@ class NewsReport(NamedTuple):
         exchange: Exchange stock is traded on.
     """
     scrappedNewsResults: ScrappedNewsResult = ScrappedNewsResult()
-    # processedNewsResults: ProcessedNewsResult = ProcessedNewsResult()
+    processedNewsResults: ProcessedNewsResult = ProcessedNewsResult()
     stockData: StockData = StockData()
     nameData: NameData = NameData()

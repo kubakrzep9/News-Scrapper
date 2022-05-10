@@ -5,7 +5,7 @@ import pytest
 from news_scanner.database.constants import PYTHON_TO_SQL_DTYPES
 from news_scanner.database.util import (
     get_datatype,
-    get_name,
+    get_table_name,
     extract_attrs,
     validate_complex_nt_schema,
     validate_complex_nt_obj,
@@ -54,7 +54,7 @@ def test_get_datatype_failed():
 def test_get_formatted_name():
     nt_name = "NamedTuple"
     expected_formatted_name = "named_tuple"
-    formatted_name = get_name(nt_name)
+    formatted_name = get_table_name(nt_name)
     assert formatted_name == expected_formatted_name
 
 
@@ -66,7 +66,7 @@ def test_get_formatted_name():
 )
 def test_get_formatted_name(nt_name: str, expected_error: str):
     with pytest.raises(ValueError) as exec_info:
-        get_name(nt_name)
+        get_table_name(nt_name)
     assert expected_error in str(exec_info)
 
 
@@ -86,7 +86,7 @@ def test_extract_attrs():
     }
 
     for namedtuple in [complexnt.namedtuple1, complexnt.namedtuple2]:
-        attr_pool_values, attr_pool_dtypes = extract_attrs(
+        attr_pool_values, attr_pool_dtypes, _ = extract_attrs(
             complex_nt=namedtuple,
             allowed_named_tuples=ALLOWED_NAMED_TUPLES,
             allowed_data_types=ALLOWED_DATA_TYPES
@@ -105,7 +105,6 @@ def test_extract_attrs_duplicate_attr_name():
             complex_nt=DuplicateAttr(),
             allowed_named_tuples=ALLOWED_NAMED_TUPLES,
             allowed_data_types=ALLOWED_DATA_TYPES,
-            attr_pool_values={},
         )
 
 
