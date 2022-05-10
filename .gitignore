@@ -1,7 +1,7 @@
 # Project files
 .idea
 databases
-export_secrets.sh
+tests/test_databases
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -132,3 +132,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# test files
+tests/database/test_databases

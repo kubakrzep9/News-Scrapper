@@ -1,7 +1,7 @@
 """ Tests util functions from news_scanner module. """
 
+from news_scanner.util import format_millions_unit_to_str
 import pytest
-from news_scanner import util
 
 
 @pytest.mark.parametrize(
@@ -36,4 +36,4 @@ def test_format_millions_unit_to_str(
         value: Float value to be formatted.
         expected: Expected formatted str.
     """
-    assert util.format_millions_unit_to_str(value) == expected
+    assert format_millions_unit_to_str(value) == expected
