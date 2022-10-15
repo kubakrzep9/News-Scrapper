@@ -1,12 +1,11 @@
 """ Functions and classes to scrape a target website's news article data. """
 
 import bs4
-from selenium import webdriver
 import requests
-from typing import List, Tuple, NamedTuple
+from typing import List, Tuple, NamedTuple, Union, Dict
 from datetime import datetime, timedelta
-from news_scanner.news_scrapper.proxy.proxy_constants import PROXY_OPTIONS
 from news_scanner.logger.logger import logger
+from urllib.parse import urlencode
 
 TIME_FORMAT = "%b %d, %Y %I:%M %p %Z"
 
@@ -31,24 +30,23 @@ class TargetNewsScrapper:
     def __init__(
         self,
         website_url: str,
+        scrapper_api_key: str,
         proxy_on: bool = False
     ):
         self.website_url = website_url
+        self.scrapper_api_key = scrapper_api_key
         self.proxy_on = proxy_on
-        if self.proxy_on:
-            self._init_web_driver()
         self.viewed_links = []
         self.num_links_found = 0
-        self.num_links_accepted = 0
+        self.num_new_links = 0
 
-    def __del__(self):
-        """ Closes connection to proxy. """
-        if self.proxy_on:
-            self.browser.close()
+    def get_news(self) -> List[ScrappedNewsResult]:
+        """ Returns the headline, link and content of a each article.
 
-    def get_news(self):
-        """ Returns the headline, link and content of a each article. """
-        headlines, links, publish_dates = self._get_headlines()
+        Note: [0] of return result is latest link.
+
+        """
+        headlines, links, publish_dates = self._get_headline_data()
         latest_index = _get_latest_link_index(links, self.viewed_links)
         contents = self._get_article_content(links[0:latest_index])
 
@@ -67,11 +65,8 @@ class TargetNewsScrapper:
             self.viewed_links.append(link)
 
         self.num_links_found = len(links)
-        self.num_links_accepted = len(results)
+        self.num_new_links = len(results)
         return results
-
-    def _init_web_driver(self):
-        self.browser = webdriver.Chrome(options=PROXY_OPTIONS)
 
     def _get_page_content(self, link: str) -> bs4.BeautifulSoup:
         """ Returns the html contents of a webpage.
@@ -80,19 +75,20 @@ class TargetNewsScrapper:
             link: url to a webpage.
         """
         if self.proxy_on:
-            self.browser.get(url=link)
-            html_content = bs4.BeautifulSoup(self.browser.page_source, features="html.parser")
+            params = {'api_key': self.scrapper_api_key, 'url': link}
+            page = requests.get('http://api.scraperapi.com/', params=urlencode(params))
+            html_content = bs4.BeautifulSoup(page.content, features="html.parser")
         else:
             page = requests.get(url=link)
             html_content = bs4.BeautifulSoup(page.content, features="html.parser")
 
         return html_content
 
-    def _get_headlines(self) -> Tuple[List[str], List[str], List[datetime]]:
-        """ Returns headlines and links of articles of all news outlets. """
+    def _get_headline_data(self) -> Tuple[List[str], List[str], List[datetime]]:
+        """ Returns parallel lists of headlines, links and publish date. """
         link = self.website_url + "/news"
         page_content = self._get_page_content(link)
-        table = page_content.find('section', attrs={'class': "news__results"})
+        table = page_content.find('section', attrs={'class': "market-news__results"})
         articles = table.find_all('article')
         headlines = []
         links = []
@@ -112,7 +108,7 @@ class TargetNewsScrapper:
         """ Returns article content from each link in links as a list of str.
 
         Param:
-            links: extension paths to corresponding news articles
+            links: extension paths to corresponding news raw_processed_articles
         """
         contents = []
         for link in links:
@@ -136,12 +132,19 @@ class TargetNewsScrapper:
         return contents
 
 
-def _get_latest_link_index(links: List[str], viewed_links: List[str]) -> int:
+def _get_latest_link_index(
+        links: List[str],
+        viewed_links: Union[List[str], Dict[str, datetime]]
+) -> int:
     """ Returns scrape_results omitting what was read.
 
-    TO DO:
-        - Search speed up: start the search from the back of viewed_links
-          and the front of links
+    TODO:
+      - Validate it works lol
+      - Search speed up: start the search from the back of viewed_links
+        and the front of links
+
+    Assumes:
+      - links[0] is latest
 
     Params:
         links: List of links from latest scrape.
@@ -152,7 +155,7 @@ def _get_latest_link_index(links: List[str], viewed_links: List[str]) -> int:
         if link in viewed_links:
             break
         latest_index += 1
-    return latest_index
+    return latest_index  # -1?
 
 
 def _to_datetime_cst(

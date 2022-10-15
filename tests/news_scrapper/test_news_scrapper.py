@@ -8,7 +8,6 @@ def test_to_datetime():
     print(time_obj.strftime('%b %d %Y %I:%M %p'))
 
 
-
 def test_get_latest_link_index():
     """ Ensures latest viewed link index is found. """
     viewed_links = ["link1", "link2", "link3", "link4", "link5"]

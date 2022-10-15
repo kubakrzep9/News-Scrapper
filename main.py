@@ -1,13 +1,16 @@
-""" Starts system. Must be executed via command line: 'python main.py'. """
+""" Starts news scanner system. """
 
 from news_scanner.news_scanner import NewsScanner
-from news_scanner.config import Config
 
 
 if __name__ == "__main__":
     news_scanner = NewsScanner(
-        config=Config(),
-        proxy_on=False,
-        twitter_on=False
+        proxy_on=True,
+        twitter_on=False,
+        database_on=False,
+        multithreaded_on=True,
+        keep_alive=False,
+        ignore_warnings=True
     )
     news_scanner.run()
+    print("Success")

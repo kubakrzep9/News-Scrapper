@@ -1,7 +1,10 @@
 """ Contains config and handle to interface with twitter api. """
 
-from typing import NamedTuple
-from twython import Twython
+from twython import Twython, exceptions
+from typing import List, NamedTuple
+from news_scanner.result_object import NewsReport
+from news_scanner import util
+from news_scanner.logger.logger import logger
 
 
 class TwitterHandleConfig(NamedTuple):
@@ -49,3 +52,26 @@ class TwitterHandle:
         if len(message) > 280:
             print("Too many characters in post")
         self.twitter.update_status(status=message)
+
+    def publish_findings(self, news_reports: List[NewsReport]) -> None:
+        """ Outputs NewsReports as alert posts on twitter.
+
+        Can add filter to limit which raw_processed_articles are posted.
+
+        Params:
+            news_report: List of NewsReport.
+        """
+        most_recent_reports = news_reports.copy()
+        most_recent_reports.reverse()
+
+        for report in most_recent_reports:
+            output = f"{report.scrappedNewsResults.link}\n" \
+                f"- published: {report.scrappedNewsResults.publish_date}\n" \
+                f"- ticker: {report.nameData.ticker}\n" \
+                f"- market cap: ${util.format_millions_unit_to_str(report.stockData.market_cap)}\n" \
+                f"- shares outstanding: {util.format_millions_unit_to_str(report.stockData.shares_outstanding)}\n" \
+                f"- last price: ${report.stockData.last_price}\n\n"
+            try:
+                self.make_post(output)
+            except exceptions.TwythonError as e:
+                logger.error(e.msg)

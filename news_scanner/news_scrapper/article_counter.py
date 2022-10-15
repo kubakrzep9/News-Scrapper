@@ -1,4 +1,4 @@
-""" Class to track the number of articles released per stock.
+""" Class to track the number of raw_processed_articles released per stock.
 
 Written by: Bart Nowobilski.
 """
@@ -13,7 +13,7 @@ class ArticleCounter:
         self.runtime_article_counts = dict()
 
     def count_stock_articles(self, news_reports: List[NewsReport]):
-        """ Counts the amount of articles per stock.
+        """ Counts the amount of raw_processed_articles per stock.
 
         Params:
             news_reports: List of NewsReport.

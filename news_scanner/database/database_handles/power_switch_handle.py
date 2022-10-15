@@ -56,11 +56,8 @@ class PowerSwitchHandle(BaseTableHandle):
 
     def _init_table(self):
         """ Creates and initializes table if it does not exist. """
-        print("creating table")
         num_rows = len(self.get_all()[self.table_handle_data.table_config.table_name])
-        print("num_rows:", num_rows)
         if num_rows == 0:
-            print("inserting")
             self.insert(
                 named_tuple=PowerSwitch(power=ON),
                 primary_key=self._power_index

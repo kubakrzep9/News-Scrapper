@@ -2,6 +2,7 @@
 .idea
 databases
 tests/test_databases
+random
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -135,3 +136,6 @@ dmypy.json
 
 # test files
 tests/database/test_databases
+
+access_token.txt
+

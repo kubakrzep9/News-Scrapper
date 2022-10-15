@@ -17,7 +17,7 @@ ALLOWED_NAMED_TUPLES = [
 
 
 class NewsReport(NamedTuple):
-    """ Result object of scrapped news articles.
+    """ Result object of scrapped news raw_processed_articles.
 
     Attrs:
         scrappedNewsResults: Result object containing data about a scrapped article.

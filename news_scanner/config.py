@@ -34,12 +34,13 @@ class Config:
     _TDA_API_KEY = "TDA_API_KEY"
     _TDA_REDIRECT_URI = "TDA_REDIRECT_URI"
     _TDA_TOKEN_PATH = "TDA_TOKEN_PATH"
+    _SCRAPPER_API_KEY = "SCRAPPER_API_KEY"
 
     def __init__(self):
         """ Retrieves secrets and api keys from environment variables. """
         # check if .env exists
         if not SECRETS_PATH.is_file():
-            raise ValueError(SECRETS_NOT_FOUND+str(SECRETS_PATH))
+            raise ValueError(f"{SECRETS_NOT_FOUND} {str(SECRETS_PATH)}")
         # load env vars from .env
         load_dotenv()
 
@@ -53,4 +54,6 @@ class Config:
         self.tda_config = TDAPIConfig(
             api_key=os.environ[self._TDA_API_KEY],
             redirect_uri=os.environ[self._TDA_REDIRECT_URI],
+            token_path=str(Path(__file__).parent.parent / "access_token.txt")
         )
+        self.scrapper_api_key = os.environ[self._SCRAPPER_API_KEY]

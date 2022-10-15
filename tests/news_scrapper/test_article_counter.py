@@ -36,7 +36,7 @@ def test_article_counter(
     news_reports: List[NewsReport],
     expected_runtime_article_counts: Dict
 ):
-    """ Ensures articles are properly counted for each stock.
+    """ Ensures raw_processed_articles are properly counted for each stock.
 
     Params:
         news_reports: List of test data NewsReport.

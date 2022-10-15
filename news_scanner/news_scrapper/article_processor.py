@@ -57,7 +57,7 @@ def process_articles(
         if ticker_code is not None:
             exchange, ticker = _process_ticker_code(ticker_code)
             if exchange in ALLOWED_EXCHANGES:
-                headline_keywords = {}  # _process_headline(scrape_result.headline)
+                headline_keywords = _process_headline(scrape_result.headline)
                 processed_result = ProcessedNewsResult(
                     article_keywords=article_keywords,
                     headline_keywords=headline_keywords,
@@ -73,7 +73,7 @@ def _process_ticker_code(ticker_code: str) -> Tuple[str, str]:
     """ Returns the exchange and ticker from a ticker_code.
 
     Params:
-        ticker_code: Ticker code found in news articles.
+        ticker_code: Ticker code found in news raw_processed_articles.
             ex: "(<exchange>:<ticker>)"
     """
     exchange_index = 0
@@ -85,19 +85,19 @@ def _process_ticker_code(ticker_code: str) -> Tuple[str, str]:
     return exchange, ticker
 
 
-def _process_headline(headline: str) -> Dict:
-    """
+def _process_headline(headline: str) -> List[WordCount]:
+    """ TO DO
 
     Param:
-        headline: A news articles headline
+        headline: A news raw_processed_articles headline
     """
-    pass
+    return [WordCount()]  # TODO
 
 
-def _process_content(content: str) -> Tuple[str, Dict]:
+def _process_content(content: str) -> Tuple[str, List[WordCount]]:
     """ Returns tickers and key words from article content.
 
-    Note: Currently only accepting articles with 1 ticker
+    Note: Currently only accepting raw_processed_articles with 1 ticker
         found from _find_ticker_codes.
 
     Param:
@@ -106,14 +106,14 @@ def _process_content(content: str) -> Tuple[str, Dict]:
     ticker_codes = _find_ticker_codes(content)
     num_tickers = len(ticker_codes)
 
+    key_words = [WordCount()]  # TODO
+
     if num_tickers == 1:
     # Find key words
-        key_words = {}
         ticker = ticker_codes[0]
         return ticker, key_words
-    # conditional statement checking whether articles include warrants
+    # conditional statement checking whether raw_processed_articles include warrants
     elif num_tickers == 2:
-        key_words = {}
         _, ticker = _process_ticker_code(ticker_codes[0])
         _, ticker2 = _process_ticker_code(ticker_codes[1])
         if abs(len(ticker) - len(ticker2)) == 1:
@@ -126,10 +126,8 @@ def _process_content(content: str) -> Tuple[str, Dict]:
     return None, None
 
 
-
-
 def _find_ticker_codes(content: str) -> List[str]:
-    """ Returns ticker codes found in articles as (EXCHANGE:TICKER).
+    """ Returns ticker codes found in raw_processed_articles as (EXCHANGE:TICKER).
 
     Params:
         content: Contents of article as a str.
@@ -138,12 +136,9 @@ def _find_ticker_codes(content: str) -> List[str]:
     ticker_pattern2 = r"[[][A-Z]+[ ]*[:][ ]*[A-Z]+[]]"
     ticker_codes = []
     for pattern in [ticker_pattern2, ticker_pattern]:
-        print(pattern)
         matches = re.findall(pattern, content)
         if matches:
             for match in matches:
                 ticker_codes.append(match.replace(" ", ""))
 
-        print(matches)
-    print(matches)
     return ticker_codes
