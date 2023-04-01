@@ -12,7 +12,7 @@ class WordCount(NamedTuple):
 
     Attrs:
         word: Word to track.
-        count: Number of occurences of a word.
+        count: Number of occurrences of a word.
 
     """
     word: str = "word"
@@ -72,6 +72,9 @@ def process_articles(
 def _process_ticker_code(ticker_code: str) -> Tuple[str, str]:
     """ Returns the exchange and ticker from a ticker_code.
 
+    TODO:
+    - handle [<exchange>:<ticker>]
+
     Params:
         ticker_code: Ticker code found in news raw_processed_articles.
             ex: "(<exchange>:<ticker>)"
@@ -82,6 +85,7 @@ def _process_ticker_code(ticker_code: str) -> Tuple[str, str]:
     tmp = tmp.split(":")
     exchange = tmp[exchange_index]
     ticker = tmp[ticker_index]
+
     return exchange, ticker
 
 
@@ -91,7 +95,8 @@ def _process_headline(headline: str) -> List[WordCount]:
     Param:
         headline: A news raw_processed_articles headline
     """
-    return [WordCount()]  # TODO
+    # return [WordCount()]  # TODO
+    return []  # TODO
 
 
 def _process_content(content: str) -> Tuple[str, List[WordCount]]:
@@ -106,7 +111,8 @@ def _process_content(content: str) -> Tuple[str, List[WordCount]]:
     ticker_codes = _find_ticker_codes(content)
     num_tickers = len(ticker_codes)
 
-    key_words = [WordCount()]  # TODO
+    # key_words = [WordCount()]  # TODO
+    key_words = []  # TODO
 
     if num_tickers == 1:
     # Find key words

@@ -9,14 +9,14 @@ from news_scanner.database.constants import PYTHON_TO_SQL_DTYPES
 from tests.database.conftest import TEST_DIR
 from news_scanner.database.table_handles.base_table_handle import BaseTableHandle
 
-TEST_DATABASE_DIR = Path(__file__).parent.parent/ "test_databases"
+TEST_DATABASE_DIR = Path(__file__).parent.parent / "test_databases"
 DUPLICATE_ATTR_NAME = "Error: duplicate attr name found in complex_nt object."
 INVALID_DATA_TYPE = "Error: datatype found not in allowed list."
 
 
-def _destroy_database():
+def _destroy_database(database_dir: Path = TEST_DATABASE_DIR):
     """ Deletes sqlite database files from test_databases directory. """
-    for path in TEST_DATABASE_DIR.iterdir():
+    for path in database_dir.iterdir():
         if path.is_file():
             path_tokens = str(path).split("/")
             file_name = path_tokens[-1]
@@ -24,10 +24,13 @@ def _destroy_database():
                 path.unlink()
 
 
-def tear_down():
+def tear_down(
+    dir_containing_log_dir: Path = TEST_DIR,
+    database_dir: Path = TEST_DATABASE_DIR
+):
     """ Tear down fixture that will remove database and log files. """
-    _destroy_test_logs(TEST_DIR)
-    _destroy_database()
+    _destroy_test_logs(dir_containing_log_dir)
+    _destroy_database(database_dir)
 
 
 def _destroy_test_logs(root_dir: Path) -> None:

@@ -9,6 +9,10 @@ from urllib.parse import urlencode
 
 TIME_FORMAT = "%b %d, %Y %I:%M %p %Z"
 
+# TO DO:
+# - Shorten latest link search by setting a cap to the number of links to look back.
+#     - Add as init parameter.
+
 
 class ScrappedNewsResult(NamedTuple):
     """ Result object containing data about a scrapped article.
@@ -66,6 +70,7 @@ class TargetNewsScrapper:
 
         self.num_links_found = len(links)
         self.num_new_links = len(results)
+
         return results
 
     def _get_page_content(self, link: str) -> bs4.BeautifulSoup:
@@ -85,8 +90,12 @@ class TargetNewsScrapper:
         return html_content
 
     def _get_headline_data(self) -> Tuple[List[str], List[str], List[datetime]]:
-        """ Returns parallel lists of headlines, links and publish date. """
+        """ Returns parallel lists of headlines, links and publish date.
+
+        Note: could get time tag contents, already converted to CDT
+        """
         link = self.website_url + "/news"
+
         page_content = self._get_page_content(link)
         table = page_content.find('section', attrs={'class': "market-news__results"})
         articles = table.find_all('article')
@@ -102,6 +111,7 @@ class TargetNewsScrapper:
             time_tag = article.find("time")
             time_str = time_tag.get_text().replace("\t", "").replace("\n", "")
             publish_dates.append(_to_datetime_cst(time_str))
+
         return headlines, links, publish_dates
 
     def _get_article_content(self, links: List[str]) -> List[str]:
@@ -125,6 +135,7 @@ class TargetNewsScrapper:
                     body += (paragraph.get_text() + " ")
             except Exception as e:
                 print("Error parsing article contents")
+                print(str(e)+f"\n- url: {link}")
                 logger.error(str(e)+f"\n- url: {link}")
 
             contents.append(body)
@@ -137,6 +148,10 @@ def _get_latest_link_index(
         viewed_links: Union[List[str], Dict[str, datetime]]
 ) -> int:
     """ Returns scrape_results omitting what was read.
+
+    Starts at most recent article (elem 0), if that link is not in
+    the viewed_links array, move to next most recent. The number of
+    new articles is the latest_index.
 
     TODO:
       - Validate it works lol
@@ -155,7 +170,7 @@ def _get_latest_link_index(
         if link in viewed_links:
             break
         latest_index += 1
-    return latest_index  # -1?
+    return latest_index
 
 
 def _to_datetime_cst(

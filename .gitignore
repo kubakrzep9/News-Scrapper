@@ -1,9 +1,3 @@
-# Project files
-.idea
-databases
-tests/test_databases
-random
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -136,6 +130,11 @@ dmypy.json
 
 # test files
 tests/database/test_databases
+
+# Project files
+.idea
+databases
+random
 
 access_token.txt
 

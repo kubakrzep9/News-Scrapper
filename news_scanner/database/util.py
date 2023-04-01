@@ -96,7 +96,7 @@ def _extract_attrs(
         elif attr_type in allowed_data_types:
             if attr_name in attr_pool_values.keys():
                 raise ValueError(f"{DUPLICATE_ATTR_NAME} ('{attr_name}')")
-            elif attr_type == list:
+            elif attr_type == list and len(attr_value) > 0:
                 extended_data_type = type(attr_value[0])
                 # Validate
                 # extended_data must be a named tuple

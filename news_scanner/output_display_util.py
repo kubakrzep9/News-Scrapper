@@ -12,9 +12,11 @@ def output_run_report(
 ):
     num_accepted = len(news_reports)
     num_rejected = len_processed_results - num_accepted
-    logger.info("Filtered results\n"
-                f"- num_accepted: {num_accepted}\n"
-                f"- num_rejected: {num_rejected}")
+    output_str = "Filtered results\n" \
+                 f"- num_accepted: {num_accepted}\n" \
+                 f"- num_rejected: {num_rejected}"
+    print(output_str)
+    logger.info(output_str)
 
     output_str = ""
     for report in news_reports:

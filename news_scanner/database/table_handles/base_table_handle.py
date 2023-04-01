@@ -88,6 +88,7 @@ class BaseTableHandle(BaseHandle):
             table_config=table_config,
             extended_data=extended_data
         )
+        print(self.extended_table_handles_data.keys())
 
     def init_table(self, table_config):
         default_nt_instance = table_config.named_tuple_type()
@@ -262,6 +263,11 @@ class BaseTableHandle(BaseHandle):
             allowed_data_types=[*self.table_handle_data.table_config.allowed_dtypes],
             allowed_named_tuples=self.table_handle_data.table_config.allowed_namedtuples
         )
+
+        # removing empty extended_table_data values that end up in attr_pool_values
+        for attr_name in [*attr_pool_values.keys()]:
+            if attr_name in self.extended_table_handles_data.keys():
+                del attr_pool_values[attr_name]
 
         self._insert(
             table_name=self.table_handle_data.table_config.table_name,
