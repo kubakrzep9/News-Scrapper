@@ -1,7 +1,7 @@
 """ Class to house common database functionality. """
 
 from pathlib import Path
-from typing import NamedTuple, Dict, List
+from typing import NamedTuple, Dict, List, Union
 from news_scanner.database.util import (
     validate_complex_nt_schema,
     validate_complex_nt_obj,
@@ -41,7 +41,7 @@ class BaseDatabaseHandle(BaseHandle):
     respective table. Remaining namedtuples will simply have their attribute names added
     as columns.
 
-    This class manage all aspects of the database.
+    This class manages all aspects of the database.
     """
 
     def __init__(
@@ -90,7 +90,11 @@ class BaseDatabaseHandle(BaseHandle):
                 db_dir=db_dir
             )
 
-    def insert(self, insert_data: List[NamedTuple], throw_exception: bool = True):
+    def insert(
+        self,
+        insert_data: Union[NamedTuple, List[NamedTuple]],
+        throw_exception: bool = True
+    ):
         """ """
         if type(insert_data) != list:
             insert_data = [insert_data]
@@ -108,6 +112,7 @@ class BaseDatabaseHandle(BaseHandle):
             try:
                 for namedtuple in complex_nt:
                     nt_name = get_table_name(type(namedtuple).__name__)
+                    print(nt_name)
                     self.table_handles[nt_name].insert(
                         named_tuple=namedtuple,
                         primary_key=primary_key
@@ -121,16 +126,18 @@ class BaseDatabaseHandle(BaseHandle):
                     raise e
                 else:
                     # LOG DATABASE INSERT FAIL
-                    print(str(e))
+                    print("DATABASE FAILURE:", str(e))
 
     def get_next_primary_key(self):
         """ Checks each table to ensure they agree on next primary key. """
         table_handles = [*self.table_handles.items()]
+        # print("table handles:", table_handles)
         first_table_handle = [*self.table_handles.items()][0][1]
         last_pk = first_table_handle.get_last_primary_key()
         next_pk = last_pk + 1 if last_pk else 1
 
         for table_handle in table_handles[1:]:
+            # print(table_handle)
             table_handle = table_handle[1]
             _last_pk = table_handle.get_last_primary_key()
             if last_pk != _last_pk:

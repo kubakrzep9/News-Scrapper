@@ -5,6 +5,8 @@ from selenium import webdriver
 import atexit
 import httpx
 from typing import NamedTuple, List, Dict
+from news_scanner.logger.logger import td_error_logger
+import json
 
 
 class TDAPIConfig(NamedTuple):
@@ -36,6 +38,15 @@ class StockData(NamedTuple):
     market_cap_float: float = 0.01
     shares_outstanding: float = 0.01
     last_price: float = 0.01
+
+
+INVALID_VALUE = -1
+INVALID_STOCK_DATA = StockData(
+    market_cap=INVALID_VALUE,
+    market_cap_float=INVALID_VALUE,
+    shares_outstanding=INVALID_VALUE,
+    last_price=INVALID_VALUE
+)
 
 
 class TDApiHandle:
@@ -95,7 +106,12 @@ class TDApiHandle:
                 )
             # stock data not found for ticker
             except KeyError as e:
-                stock_data[ticker] = StockData()
+                # print(f"StockData Error: {ticker} data not found.")
+                td_error_logger.error(json.dumps({
+                    "ticker": ticker,
+                    "error": "Data not found."
+                }))
+                stock_data[ticker] = INVALID_STOCK_DATA
         return stock_data
 
     def _get_fundamentals(self, tickers: List[str]) -> Dict:

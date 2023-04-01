@@ -38,7 +38,7 @@ def test_find_ticker_codes(content, true_tickers):
 def test_process_content_tickers(
     content: str, true_tickers: str
 ):
-    """ Ensures articles are processed properly.
+    """ Ensures raw_processed_articles are processed properly.
 
     Params:
         content: Mock article content.
